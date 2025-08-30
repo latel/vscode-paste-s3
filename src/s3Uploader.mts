@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import _ from 'lodash';
-import { S3Client, DeleteObjectCommand, S3ServiceException } from '@aws-sdk/client-s3';
+import { S3Client, DeleteObjectCommand, HeadObjectCommand, S3ServiceException } from '@aws-sdk/client-s3';
 import { Upload } from "@aws-sdk/lib-storage";
 import { filesize } from 'filesize';
 import { ResourceFile, ResourceUploader, ResourceUploadResult, S3Options } from './common.mjs';
@@ -48,7 +48,7 @@ export class S3Uploader implements ResourceUploader {
 
     private async checkIfObjectExists(key: string): Promise<boolean> {
         try {
-            const headObjectCommand = new DeleteObjectCommand({
+            const headObjectCommand = new HeadObjectCommand({
                 Bucket: this.s3Option.bucket,
                 Key: key
             });
