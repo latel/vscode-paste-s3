@@ -1,0 +1,66 @@
+{
+  "displayName": "Paste and Upload",
+  "description": "Paste and upload image to S3-Compatible storage. Works in remote development environments.",
+  
+  "command.testS3Connection.title": "Test S3 Connection",
+  "command.undoRecentUpload.title": "Undo Recent Upload",
+  
+  "configuration.title": "Paste and Upload",
+  
+  "configuration.s3.region.description": "The region of the S3-compatible storage. Must be set.",
+  "configuration.s3.endpoint.description": "The endpoint of the S3-compatible storage. Leave empty if you are using AWS S3.",
+  "configuration.s3.accessKeyId.description": "The access key ID of the S3-compatible storage. Can be left empty if your bucket does not require authentication to upload files (Not recommended).",
+  "configuration.s3.secretAccessKey.description": "The secret access key of the S3-compatible storage. Can be left empty if your bucket does not require authentication to upload files (Not recommended).",
+  "configuration.s3.bucket.description": "The bucket of the S3-compatible storage. Must be set.",
+  "configuration.s3.prefix.description": "The path prefix that will be used to store the files. For example, `images/` will store the files in the `images` folder. (Slashes will be preserved).",
+  "configuration.s3.publicUrlBase.description": "The base that should be prepended to the file name to generate the final link. For example, `https://example.com/imgs/` will generate the URL `https://example.com/imgs/image.png`. The path prefix should be manually added to the base URL (slashes will be preserved), or handled by your reverse proxy.",
+  "configuration.s3.omitExtension.description": "Do not include the file extension in the uploaded file name (key).",
+  "configuration.s3.skipExisting.description": "Skip uploading if the file already exists in the destination. Useful when file names are generated based on the content hash.",
+  "configuration.s3.forcePathStyle.description": "Whether to force path style URLs for S3 objects. Useful for S3-compatible storage that doesn't support virtual-hosted-style URLs.",
+  "configuration.s3.clientOptions.description": "Additional S3 client options in JSON format. These options will be merged into the S3Client configuration. See [AWS SDK S3Client documentation](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html) for available options.",
+  
+  "configuration.workspace.path.description": "The path where the files will be saved locally. The path is relative to the workspace folder.",
+  "configuration.workspace.linkBase.description": "The base that should be prepended to the file name to generate the final link.",
+  
+  "configuration.enabled.description": "Enable the extension.",
+  "configuration.uploadDestination.description": "The destination where the files will be uploaded.",
+  "configuration.uploadDestination.enum.s3": "Upload the files to the S3-compatible storage.",
+  "configuration.uploadDestination.enum.workspace": "Save the files locally in the workspace.",
+  
+  "configuration.fileSizeLimit.description": "File size limit in bytes. Users will be prompted to confirm the upload if the file size exceeds this limit. Set to 0 to disable the limit.",
+  "configuration.allowMultipleFiles.description": "Allow multiple files to be uploaded at once.",
+  
+  "configuration.mimeTypeDetectionMethod.description": "How to detect the MIME type of the files when the clipboard does not provide it.",
+  "configuration.mimeTypeDetectionMethod.enumItemLabel.content": "Content",
+  "configuration.mimeTypeDetectionMethod.enumItemLabel.extension": "Extension",
+  "configuration.mimeTypeDetectionMethod.enumItemLabel.none": "None",
+  "configuration.mimeTypeDetectionMethod.enum.content": "Detect the MIME type of the files based on magic bytes in the content, and fallbacks to file extension when failed",
+  "configuration.mimeTypeDetectionMethod.enum.extension": "Detect the MIME type of the files based on the file extension",
+  "configuration.mimeTypeDetectionMethod.enum.none": "Do not detect the MIME type of the files, use `application/octet-stream` as the default MIME type",
+  
+  "configuration.keepOriginalFilename.description": "Keep the original file name when uploading files. If disabled, a random name will be generated. Default file names like `image.png` will always be renamed.",
+  
+  "configuration.fileNamingMethod.description": "The method used to generate the file name when `#paste-and-upload.keepOriginalFilename#` is disabled, or when the file name is not provided by the clipboard.",
+  "configuration.fileNamingMethod.enumItemLabel.md5": "MD5 Hash",
+  "configuration.fileNamingMethod.enumItemLabel.md5Short": "Short MD5 Hash",
+  "configuration.fileNamingMethod.enumItemLabel.uuid": "UUID",
+  "configuration.fileNamingMethod.enumItemLabel.nanoid": "Nano ID",
+  "configuration.fileNamingMethod.enumItemLabel.unixTimestamp": "Unix Timestamp",
+  "configuration.fileNamingMethod.enumItemLabel.readableTimestamp": "Readable Timestamp",
+  "configuration.fileNamingMethod.enumItemLabel.prompt": "Prompt",
+  "configuration.fileNamingMethod.enum.md5": "MD5 hash of the file content.",
+  "configuration.fileNamingMethod.enum.md5Short": "Short (8 Digits) MD5 hash of the file content.",
+  "configuration.fileNamingMethod.enum.uuid": "Random UUIDv4.",
+  "configuration.fileNamingMethod.enum.nanoid": "Random Nano ID.",
+  "configuration.fileNamingMethod.enum.unixTimestamp": "Unix timestamp in milliseconds.",
+  "configuration.fileNamingMethod.enum.readableTimestamp": "Human-readable timestamp.",
+  "configuration.fileNamingMethod.enum.prompt": "Prompt the user for a name.",
+  
+  "configuration.defaultSnippet.description": "The default snippet that will be inserted in the document after uploading. The following variables can be used: \n\n- `${url}`\n- `${filename}`\n- `${filenameWithoutExtension}`\n- `${extension}`\n- `${mimeType}`",
+  "configuration.imageSnippet.description": "The default snippet that will be inserted in the document after uploading. The following variables can be used: \n\n- `${url}`\n- `${filename}`\n- `${filenameWithoutExtension}`\n- `${extension}`\n- `${mimeType}`",
+  
+  "configuration.undoLimit.description": "The maximum number of undo uploads that can be performed. Set to 0 to disable the undo feature.",
+  "configuration.mimeTypeFilter.description": "A regular expression that matches the MIME types that should be uploaded, for example, `image/.*` will only upload images. Leave empty to upload any MIME type. Note that the MIME type of text files is not realiably detected, and will be treated as `application/octet-stream` if the detection fails.",
+  "configuration.ignoreWorkspaceFiles.description": "Ignore files that are already in the workspace when uploading files. Other extensions like the built-in Markdown extension may handle these files.",
+  "configuration.retrieveOriginalImage.description": "Whether to try to download the original image from the clipboard when pasting. This is useful for pasting animated images from browsers like Microsoft Edge, which only provide a static image in the clipboard."
+}
