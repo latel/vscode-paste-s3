@@ -1,0 +1,60 @@
+name: Publish to VSCode Marketplace
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (leave empty to use package.json version)'
+        required: false
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run linter
+        run: yarn run lint
+
+      - name: Build extension
+        run: yarn run package
+
+      - name: Run tests
+        run: xvfb-run -a yarn test
+
+      - name: Package extension
+        run: yarn vsce package
+
+      - name: Publish to VSCode Marketplace
+        run: yarn vsce publish -p ${{ secrets.VSCE_TOKEN }}
+        env:
+          VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
+
+      - name: Publish to Open VSX Registry
+        run: |
+          yarn global add ovsx
+          ovsx publish -p ${{ secrets.OVSX_TOKEN }} *.vsix
+        continue-on-error: true
+        env:
+          OVSX_TOKEN: ${{ secrets.OVSX_TOKEN }}
+
+      - name: Upload VSIX as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vscode-extension-vsix
+          path: '*.vsix'
+          retention-days: 90
