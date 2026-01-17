@@ -20,6 +20,7 @@
 - 将图片上传到任何 S3 兼容存储（不限于 AWS S3，例如阿里云 OSS、Cloudflare R2 等）
 - 或将图片保存到工作区（支持虚拟工作区，如 [Overleaf Workshop](https://marketplace.visualstudio.com/items?itemName=iamhyc.overleaf-workshop)）
   ![Overleaf Workshop 示例](assets/overleaf.gif)
+- 智能缓存，避免重复上传相同文件（基于内容哈希）
 
 ## 系统要求
 
@@ -40,7 +41,9 @@
   // 将添加到 S3 对象键的前缀（斜杠将被保留）
   "paste-s3.s3.prefix": "img/",
   // 将添加到插入链接的前缀（斜杠将被保留）
-  "paste-s3.s3.publicUrlBase": "https://cdn.duanyll.com/img/"
+  "paste-s3.s3.publicUrlBase": "https://cdn.duanyll.com/img/",
+  // 强制使用路径样式 URL，适用于 S3 兼容存储（如 MinIO）
+  "paste-s3.s3.forcePathStyle": true
 }
 ```
 
