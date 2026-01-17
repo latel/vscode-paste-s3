@@ -6,6 +6,7 @@ import { nanoid } from 'nanoid';
 import MD5 from 'md5.js';
 
 import { FileNamingMethod, IncompleteResourceFile, ResourceFile } from './common.mjs';
+import { getLogger } from './logger.mjs';
 
 /**
  * Hash provider that prioritizes xxHash series, then system crypto functions for best performance
@@ -23,7 +24,8 @@ let selectedHashCommand: string | null = null;
 try {
     childProcess = require('child_process');
 } catch (error) {
-    console.log('[Paste and Upload] child_process not available');
+    const logger = getLogger();
+    logger.debug('child_process not available');
 }
 
 // Check for xxHash command-line tools
@@ -40,7 +42,8 @@ if (childProcess) {
                 timeout: 1000 // 1 second timeout
             });
             selectedHashCommand = tool;
-            console.log(`[Paste and Upload] Using xxHash command-line tool: ${tool}`);
+            const logger = getLogger();
+            logger.debug(`Using xxHash command-line tool: ${tool}`);
             break;
         } catch (error) {
             // Tool not available or timed out, continue to next
@@ -62,7 +65,8 @@ if (!selectedHashCommand) {
             for (const algo of hashPriority) {
                 if (availableHashes.includes(algo)) {
                     selectedHashAlgorithm = algo;
-                    console.log(`[Paste and Upload] Using system crypto hash: ${algo}`);
+                    const logger = getLogger();
+                    logger.debug(`Using system crypto hash: ${algo}`);
                     break;
                 }
             }
@@ -71,11 +75,13 @@ if (!selectedHashCommand) {
             // This ensures we fall back to md5.js which is known to work
             if (!selectedHashAlgorithm) {
                 systemCrypto = null;
-                console.log('[Paste and Upload] Preferred hash algorithms not available in system crypto, using md5.js fallback');
+                const logger = getLogger();
+                logger.debug('Preferred hash algorithms not available in system crypto, using md5.js fallback');
             }
         }
     } catch (error) {
-        console.log('[Paste and Upload] System crypto not available, using md5.js fallback');
+        const logger = getLogger();
+        logger.debug('System crypto not available, using md5.js fallback');
     }
 }
 
@@ -121,7 +127,8 @@ function calculateHash(data: Uint8Array): string {
                 throw new Error(`Invalid hash format: ${hash}`);
             }
         } catch (error) {
-            console.warn(`[Paste and Upload] Failed to use ${selectedHashCommand}, falling back to next method:`, error);
+            const logger = getLogger();
+            logger.warn(`Failed to use ${selectedHashCommand}, falling back to next method:`, error);
             // Fall through to next method
         }
     }
@@ -139,6 +146,7 @@ function calculateHash(data: Uint8Array): string {
 const extensionConfig = vscode.workspace.getConfiguration('paste-s3');
 
 export async function inspectDataTransfer(dataTransfer: vscode.DataTransfer) {
+    const logger = getLogger();
     let count = 0;
     for (const i of dataTransfer) {
         count++;
@@ -153,9 +161,9 @@ export async function inspectDataTransfer(dataTransfer: vscode.DataTransfer) {
                 itemStr = `${itemStr.substring(0, 100)} ... (${itemStr.length} bytes)`;
             }
         }
-        console.log(`[${count}] ${mime}: ${itemStr}`);
+        logger.debug(`[${count}] ${mime}: ${itemStr}`);
     }
-    console.log(`Total ${count} items`);
+    logger.debug(`Total ${count} items in data transfer`);
 }
 
 export function extractBasenameAndExtension(filePath: string): [string, string] {
@@ -220,7 +228,8 @@ function inferFilename(url: string, headers: AxiosResponseHeaders): string {
             return decodeURIComponent(lastSegment);
         }
     } catch (e) {
-        console.warn('Could not parse URL to infer filename:', e);
+        const logger = getLogger();
+        logger.warn('Could not parse URL to infer filename:', e);
     }
     
     return "image";
@@ -322,7 +331,8 @@ export async function downloadFileWithProgress(url: string): Promise<IncompleteR
         }, (progress, token) => {
             token.onCancellationRequested(() => {
                 abortController.abort();
-                console.log('User cancelled the download.');
+                const logger = getLogger();
+                logger.info('User cancelled the download');
             });
 
             let lastReportedPercentage = 0;

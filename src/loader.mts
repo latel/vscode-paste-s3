@@ -7,6 +7,7 @@ import axios from 'axios';
 
 import { downloadFileWithProgress, extractBasenameAndExtension, generateFileName, headContentType } from './utils.mjs';
 import { ResourceFileLoaderOptions, MimeTypeDetectionMethod, FileNamingMethod, IncompleteResourceFile, ResourceFile, AllowMultipleFiles, UploadDestination } from './common.mjs';
+import { getLogger } from './logger.mjs';
 
 export class ResourceFileLoader {
     private readonly options: ResourceFileLoaderOptions;
@@ -70,7 +71,8 @@ export class ResourceFileLoader {
                     files.push({ name, extension, data: Buffer.from(data) });
                 }
             } catch (e) {
-                console.log(`Cannot load file from URI: ${uri}`);
+                const logger = getLogger();
+                logger.debug(`Cannot load file from URI: ${uri}`, e);
             }
         }
         return files;
@@ -135,6 +137,7 @@ export class ResourceFileLoader {
     }
 
     private async tryRetrieveOriginalImage(dataTransfer: vscode.DataTransfer, files: ResourceFile[]): Promise<ResourceFile[]> {
+        const logger = getLogger();
         const htmlContent = await dataTransfer.get('text/html')?.asString();
         if (_.isEmpty(htmlContent)) {
             return files;
@@ -148,25 +151,30 @@ export class ResourceFileLoader {
         }
         // Try to HEAD request the URL to get its content type
         try {
+            logger.debug(`Attempting to retrieve original image from URL: ${url}`);
             const contentType = await headContentType(url!);
             const matchingFile = files.find(file => file.mime === contentType);
             if (matchingFile) {
+                logger.debug('File with same mime type already exists, skipping original image retrieval');
                 // If a file with the same mime type already exists, skip
                 return files;
             }
             // If no matching file is found, download the image
+            logger.info(`Downloading original image from: ${url}`);
             const file = await downloadFileWithProgress(url!);
             const completedFile = await this.completeResourceFile(file);
             return completedFile ? [completedFile] : files;
         } catch (error) {
+            logger.warn(`Failed to retrieve original image from URL: ${url}. Animated content may be lost.`, error);
             vscode.window.showWarningMessage(`Failed to retrieve original image from URL: ${url}. Animated content may be lost.`);
-            console.error(error);
             return files;
         }
     }
 
     public async prepareFilesToUpload(dataTransfer: vscode.DataTransfer): Promise<ResourceFile[]> {
+        const logger = getLogger();
         if (!this.options.enabled) {
+            logger.debug('Extension is disabled for this language');
             return [];
         }
 
@@ -175,6 +183,8 @@ export class ResourceFileLoader {
         if (_.isEmpty(files)) {
             files = await this.loadDataTransferUriLists(dataTransfer);
         }
+        
+        logger.debug(`Loaded ${files.length} file(s) from data transfer`);
 
         // Complete file information
         let result: ResourceFile[] = [];
@@ -189,19 +199,26 @@ export class ResourceFileLoader {
         // Filter by mime type
         if (!_.isEmpty(this.options.mimeTypeFilter)) {
             const regex = new RegExp(this.options.mimeTypeFilter, 'i');
+            const beforeCount = result.length;
             result = _.filter(result, i => regex.test(i.mime));
+            if (result.length < beforeCount) {
+                logger.debug(`Filtered ${beforeCount - result.length} file(s) by mime type filter`);
+            }
         }
 
         // Check against multiple files limit
         if (files.length > 1) {
             if (this.options.allowMultipleFiles === 'deny') {
+                logger.info('Multiple files denied by configuration');
                 vscode.window.showWarningMessage('Multiple files are not allowed, please select only one file.');
                 return [];
             } else if (this.options.allowMultipleFiles === 'prompt') {
                 const result = await vscode.window.showInformationMessage('Multiple files detected, do you want to upload all of them?', 'Yes', 'No');
                 if (result !== 'Yes') {
+                    logger.info('User declined multiple files upload');
                     return [];
                 }
+                logger.info('User accepted multiple files upload');
             }
         }
         
@@ -213,12 +230,16 @@ export class ResourceFileLoader {
         // Check against file size limit
         let totalSize = _.sumBy(result, i => i.data.length);
         if (this.options.fileSizeLimit > 0 && totalSize > this.options.fileSizeLimit) {
+            logger.info(`Total file size (${filesize(totalSize)}) exceeds limit (${filesize(this.options.fileSizeLimit)}), prompting user`);
             const choice = await vscode.window.showWarningMessage(`The size of selected files (${filesize(totalSize)}) is very large, still upload?`, 'Yes', 'No');
             if (choice !== 'Yes') {
+                logger.info('User declined large file upload');
                 return [];
             }
+            logger.info('User accepted large file upload');
         }
 
+        logger.info(`Prepared ${result.length} file(s) for upload (total: ${filesize(totalSize)})`);
         return result;
     }
 

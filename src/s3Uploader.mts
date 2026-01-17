@@ -5,6 +5,7 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { filesize } from 'filesize';
 import { ResourceFile, ResourceUploader, ResourceUploadResult, S3Options } from './common.mjs';
 import { UploadCache, calculateFileHash } from './utils.mjs';
+import { getLogger } from './logger.mjs';
 
 export class S3Uploader implements ResourceUploader {
     private client: S3Client;
@@ -13,15 +14,21 @@ export class S3Uploader implements ResourceUploader {
     private static readonly RESERVED_CLIENT_OPTIONS = ['credentials', 'region', 'endpoint'];
 
     constructor(context: vscode.ExtensionContext) {
+        const logger = getLogger();
+        logger.debug('Initializing S3Uploader...');
         this.cache = new UploadCache(context);
         const s3Section = vscode.workspace.getConfiguration('paste-s3.s3');
         const region = s3Section.get<string>('region');
         if (_.isEmpty(region)) {
-            throw new Error('Region is required');
+            const error = 'Region is required';
+            logger.error(error);
+            throw new Error(error);
         }
         const bucket = s3Section.get<string>('bucket');
         if (_.isEmpty(bucket)) {
-            throw new Error('Bucket is required');
+            const error = 'Bucket is required';
+            logger.error(error);
+            throw new Error(error);
         }
         const emptyToUndefined = (value: string | undefined) => _.isEmpty(value) ? undefined : value;
         this.s3Option = {
@@ -38,6 +45,7 @@ export class S3Uploader implements ResourceUploader {
             clientOptions: this.parseClientOptions(s3Section.get<string>('clientOptions'))
         };
         this.client = this.createClient();
+        logger.info(`S3Uploader initialized: region=${this.s3Option.region}, bucket=${this.s3Option.bucket}, endpoint=${this.s3Option.endpoint || 'default'}`);
     }
 
     private parseClientOptions(clientOptionsJson?: string): Record<string, any> | undefined {
@@ -100,27 +108,35 @@ export class S3Uploader implements ResourceUploader {
     }
 
     private async checkIfObjectExists(key: string): Promise<boolean> {
+        const logger = getLogger();
         try {
+            logger.debug(`Checking if object exists: ${key}`);
             const headObjectCommand = new HeadObjectCommand({
                 Bucket: this.s3Option.bucket,
                 Key: key
             });
             await this.client.send(headObjectCommand);
+            logger.debug(`Object exists: ${key}`);
             return true; // Object exists
         } catch (error) {
             if (error instanceof S3ServiceException && error.name === 'NotFound') {
+                logger.debug(`Object does not exist: ${key}`);
                 return false; // Object does not exist
             }
+            logger.error(`Error checking object existence: ${key}`, error);
             throw error;
         }
     }
 
     public async uploadBuffer(buffer: Uint8Array, key: string, contentType?: string): Promise<void> {
+        const logger = getLogger();
         if (this.s3Option.skipExisting) {
             if (await this.checkIfObjectExists(key)) {
+                logger.info(`Skipping upload, object already exists: ${key}`);
                 return; // Skip upload if the object already exists
             }
         }
+        logger.info(`Starting S3 upload: ${key} (${filesize(buffer.length)}, ${contentType || 'unknown type'})`);
         const upload = new Upload({
             client: this.client,
             params: {
@@ -153,34 +169,45 @@ export class S3Uploader implements ResourceUploader {
         }, 1000);
         try {
             await donePromise;
+            logger.info(`S3 upload completed successfully: ${key}`);
         } finally {
             clearTimeout(timeout);
         }
     }
 
     public async deleteObject(key: string): Promise<void> {
+        const logger = getLogger();
+        logger.info(`Deleting S3 object: ${key}`);
         await this.client.send(new DeleteObjectCommand({
             Bucket: this.s3Option.bucket,
             Key: key
         }));
+        logger.info(`Successfully deleted S3 object: ${key}`);
     }
 
     public async testConnection(): Promise<void> {
+        const logger = getLogger();
+        logger.info('Testing S3 connection...');
         const payload = new Uint8Array(100 * 1000);
         const prefix = vscode.workspace.getConfiguration('paste-s3.s3').get<string>('prefix') ?? '';
         const key = `${prefix}paste-s3-test.txt`;
         try {
+            logger.debug(`Uploading test payload: ${key}`);
             await this.uploadBuffer(payload, key);
         } catch (e) {
+            logger.error('Unable to upload test payload', e);
             vscode.window.showErrorMessage(`Unable to upload test payload: ${e}`);
             return;
         }
         try {
+            logger.debug(`Deleting test payload: ${key}`);
             await this.deleteObject(key);
         } catch (e) {
+            logger.error('Unable to delete test payload', e);
             vscode.window.showWarningMessage(`A test payload (${payload}) has been successfully uploaded, but unable to delete it: ${e}`);
             return;
         }
+        logger.info('S3 connection test successful');
         vscode.window.showInformationMessage('Your S3 connection is working fine');
     }
 
@@ -208,13 +235,14 @@ export class S3Uploader implements ResourceUploader {
     }
 
     public async uploadFile(file: ResourceFile, doucumentUri: vscode.Uri, edit: vscode.WorkspaceEdit): Promise<ResourceUploadResult> {
+        const logger = getLogger();
         // Calculate hash for cache lookup
         const fileHash = calculateFileHash(file);
         
         // Check if we have a cached URL for this file
         const cachedUrl = this.cache.getCachedUrl(fileHash);
         if (cachedUrl) {
-            console.log(`Using cached URL for file hash ${fileHash}: ${cachedUrl}`);
+            logger.info(`Using cached URL for file hash ${fileHash}: ${cachedUrl}`);
             // Return cached URL without uploading
             // Note: No undo provided for cached results since no upload occurred
             return {
@@ -228,6 +256,7 @@ export class S3Uploader implements ResourceUploader {
         const url = this.generatePublicUrl(file.name, file.extension);
         
         // Cache the URL for future use
+        logger.debug(`Caching URL for file hash ${fileHash}: ${url}`);
         await this.cache.setCachedUrl(fileHash, url);
         
         return {
