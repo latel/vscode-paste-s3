@@ -4,13 +4,16 @@ import { S3Client, DeleteObjectCommand, HeadObjectCommand, S3ServiceException, S
 import { Upload } from "@aws-sdk/lib-storage";
 import { filesize } from 'filesize';
 import { ResourceFile, ResourceUploader, ResourceUploadResult, S3Options } from './common.mjs';
+import { UploadCache, calculateFileHash } from './utils.mjs';
 
 export class S3Uploader implements ResourceUploader {
     private client: S3Client;
     private s3Option: S3Options;
+    private cache: UploadCache;
     private static readonly RESERVED_CLIENT_OPTIONS = ['credentials', 'region', 'endpoint'];
 
-    constructor() {
+    constructor(context: vscode.ExtensionContext) {
+        this.cache = new UploadCache(context);
         const s3Section = vscode.workspace.getConfiguration('paste-and-upload.s3');
         const region = s3Section.get<string>('region');
         if (_.isEmpty(region)) {
@@ -205,10 +208,30 @@ export class S3Uploader implements ResourceUploader {
     }
 
     public async uploadFile(file: ResourceFile): Promise<ResourceUploadResult> {
+        // Calculate hash for cache lookup
+        const fileHash = calculateFileHash(file);
+        
+        // Check if we have a cached URL for this file
+        const cachedUrl = this.cache.getCachedUrl(fileHash);
+        if (cachedUrl) {
+            console.log(`Using cached URL for file hash ${fileHash}: ${cachedUrl}`);
+            // Return cached URL without uploading
+            return {
+                uri: cachedUrl,
+                // Note: We don't provide undo for cached uploads since the file wasn't uploaded this time
+            };
+        }
+        
+        // No cache hit, proceed with upload
         const key = this.generateKey(file.name, file.extension);
         await this.uploadBuffer(file.data, key, file.mime);
+        const url = this.generatePublicUrl(file.name, file.extension);
+        
+        // Cache the URL for future use
+        await this.cache.setCachedUrl(fileHash, url);
+        
         return {
-            uri: this.generatePublicUrl(file.name, file.extension),
+            uri: url,
             undoTitle: key,
             undo: async () => {
                 await this.deleteObject(key);

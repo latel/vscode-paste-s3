@@ -6,10 +6,10 @@ import { S3Uploader } from './s3Uploader.mjs';
 
 export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('paste-and-upload.testS3Connection', () => {
-		const uploader = new S3Uploader();
+		const uploader = new S3Uploader(context);
 		uploader.testConnection();
 	}));
-	const provider = new ResourcePasteOrDropProvider();
+	const provider = new ResourcePasteOrDropProvider(context);
 	context.subscriptions.push(provider.register());
 
 	const myExtension = vscode.extensions.getExtension('duanyll.paste-and-upload');

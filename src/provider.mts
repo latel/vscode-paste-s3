@@ -35,7 +35,8 @@ export class ResourcePasteOrDropProvider implements vscode.DocumentPasteEditProv
     uploaders: { [key: string]: ResourceUploader } = {};
     undoHistory: [string, () => Thenable<void>][] = [];
     undoLimit = vscode.workspace.getConfiguration('paste-and-upload').get<number>('undoLimit') ?? 10;
-    constructor() {
+    
+    constructor(private context: vscode.ExtensionContext) {
         console.log('ResourcePasteOrDropProvider created');
     }
 
@@ -50,10 +51,10 @@ export class ResourcePasteOrDropProvider implements vscode.DocumentPasteEditProv
         if (!this.uploaders[key]) {
             switch (key) {
                 case 's3':
-                    this.uploaders[key] = new S3Uploader();
+                    this.uploaders[key] = new S3Uploader(this.context);
                     break;
                 case 'workspace':
-                    this.uploaders[key] = new WorkspaceUploader();
+                    this.uploaders[key] = new WorkspaceUploader(this.context);
                     break;
                 default:
                     throw new Error(`Unknown upload destination ${key}`);

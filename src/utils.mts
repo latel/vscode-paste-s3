@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { nanoid } from 'nanoid';
 import MD5 from 'md5.js';
 
-import { FileNamingMethod, IncompleteResourceFile } from './common.mjs';
+import { FileNamingMethod, IncompleteResourceFile, ResourceFile } from './common.mjs';
 
 const extensionConfig = vscode.workspace.getConfiguration('paste-and-upload');
 
@@ -98,6 +98,55 @@ function inferFilename(url: string, headers: AxiosResponseHeaders): string {
 }
 
 const acceptHeader = "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
+
+/**
+ * Calculate MD5 hash for a file's data
+ */
+export function calculateFileHash(file: ResourceFile): string {
+    return new MD5().update(file.data).digest('hex');
+}
+
+/**
+ * Upload cache manager to avoid re-uploading the same file
+ */
+export class UploadCache {
+    private static readonly CACHE_KEY = 'paste-and-upload.uploadCache';
+    private static readonly MAX_CACHE_SIZE = 1000; // Maximum number of cached entries
+
+    constructor(private context: vscode.ExtensionContext) {}
+
+    /**
+     * Get cached URL for a file hash
+     */
+    getCachedUrl(hash: string): string | undefined {
+        const cache = this.context.globalState.get<Record<string, string>>(UploadCache.CACHE_KEY, {});
+        return cache[hash];
+    }
+
+    /**
+     * Store a file hash to URL mapping in cache
+     */
+    async setCachedUrl(hash: string, url: string): Promise<void> {
+        let cache = this.context.globalState.get<Record<string, string>>(UploadCache.CACHE_KEY, {});
+        
+        // Simple size limit: if cache is too large, clear oldest half
+        if (Object.keys(cache).length >= UploadCache.MAX_CACHE_SIZE) {
+            const entries = Object.entries(cache);
+            const half = Math.floor(entries.length / 2);
+            cache = Object.fromEntries(entries.slice(half));
+        }
+        
+        cache[hash] = url;
+        await this.context.globalState.update(UploadCache.CACHE_KEY, cache);
+    }
+
+    /**
+     * Clear all cached entries
+     */
+    async clearCache(): Promise<void> {
+        await this.context.globalState.update(UploadCache.CACHE_KEY, {});
+    }
+}
 
 export async function headContentType(url: string): Promise<string | undefined> {
     const response = await axios.head(url, {
