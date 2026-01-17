@@ -16,6 +16,37 @@ Runs on every push to `master`/`main` branches and on pull requests.
 5. Run tests
 6. Upload build artifacts
 
+### Changeset Version Workflow (`changeset-version.yml`)
+
+**NEW** Automated version management using changesets.
+
+**Triggers:**
+- When changeset files (`.changeset/*.md`) are pushed to master
+- Manually via workflow dispatch
+
+**What it does:**
+1. Detects new changeset files
+2. Creates or updates a "Version Packages" PR
+3. Applies version bumps and updates CHANGELOG.md
+4. Merging this PR will trigger the publish workflow
+
+### Changeset Release Workflow (`changeset-publish.yml`)
+
+**NEW** Automatically publishes when version changes are merged to master.
+
+**Triggers:**
+- When `package.json` is modified on master branch
+
+**What it does:**
+1. Detects if the version number changed
+2. If changed, automatically builds, tests, and publishes
+3. Publishes to both VSCode Marketplace and Open VSX Registry
+
+**Benefits:**
+- No manual release creation needed
+- Automatic publishing when version bumps are merged
+- Integrated with changeset workflow
+
 ### Release Workflow (`release.yml`)
 
 Publishes the extension to VSCode Marketplace and Open VSX Registry.
@@ -70,7 +101,19 @@ Personal Access Token for publishing to Open VSX Registry.
 
 ### Publishing a Release
 
-**Option 1: Via GitHub Release (Recommended)**
+**Option 1: Using Changesets (Recommended for ongoing development)**
+1. Create a changeset for your changes:
+   ```bash
+   yarn changeset
+   ```
+2. Follow the prompts to select version bump type and describe changes
+3. Commit the changeset file (`.changeset/*.md`)
+4. Push to master branch
+5. The `changeset-version.yml` workflow will create a "Version Packages" PR
+6. Review and merge the PR
+7. The `changeset-publish.yml` workflow will automatically publish
+
+**Option 2: Via GitHub Release (Traditional method)**
 1. Create a new tag: `git tag v0.x.x`
 2. Push the tag: `git push origin v0.x.x`
 3. Go to GitHub repository → Releases → Draft a new release
@@ -79,7 +122,7 @@ Personal Access Token for publishing to Open VSX Registry.
 6. Click "Publish release"
 7. The workflow will automatically trigger and publish the extension
 
-**Option 2: Via Manual Workflow Dispatch**
+**Option 3: Via Manual Workflow Dispatch**
 1. Go to Actions → "Publish to VSCode Marketplace"
 2. Click "Run workflow"
 3. Select the branch
@@ -87,6 +130,32 @@ Personal Access Token for publishing to Open VSX Registry.
 5. Click "Run workflow"
 
 ### Version Management
+
+**With Changesets (Recommended):**
+
+This project now uses [Changesets](https://github.com/changesets/changesets) for version management.
+
+1. **Creating a changeset:**
+   ```bash
+   yarn changeset
+   ```
+   This will prompt you to:
+   - Select the type of version bump (patch/minor/major)
+   - Describe the changes
+
+2. **The changeset file:**
+   - A markdown file is created in `.changeset/`
+   - Commit this file with your changes
+   - Multiple changesets can accumulate before a release
+
+3. **Version bumping:**
+   - When changesets are merged to master, a PR is automatically created
+   - The PR updates `package.json` and `CHANGELOG.md`
+   - Merging this PR automatically publishes the extension
+
+See [CHANGESET_WORKFLOW.md](../../docs/CHANGESET_WORKFLOW.md) for detailed information.
+
+**Manual Version Management (Legacy):**
 
 The extension version is defined in `package.json`. Make sure to:
 1. Update the version number before creating a release
