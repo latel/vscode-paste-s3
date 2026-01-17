@@ -8,47 +8,100 @@ import MD5 from 'md5.js';
 import { FileNamingMethod, IncompleteResourceFile, ResourceFile } from './common.mjs';
 
 /**
- * Hash provider that prioritizes system crypto functions for best performance
+ * Hash provider that prioritizes xxHash series, then system crypto functions for best performance
  * Falls back to md5.js if system crypto is unavailable
  */
 let systemCrypto: typeof import('crypto') | null = null;
+let childProcess: typeof import('child_process') | null = null;
 let selectedHashAlgorithm: string | null = null;
+let selectedHashCommand: string | null = null;
 
-// Try to load system crypto and select the best available hash algorithm
+// Try to load child_process for command-line hash tools
 try {
-    systemCrypto = require('crypto');
-    if (systemCrypto) {
-        const availableHashes = systemCrypto.getHashes();
-        
-        // Priority order: blake2b512 > blake2s256 > md5 (by performance)
-        // For file deduplication, we don't need cryptographic security
-        const hashPriority = ['blake2b512', 'blake2s256', 'md5'];
-        
-        for (const algo of hashPriority) {
-            if (availableHashes.includes(algo)) {
-                selectedHashAlgorithm = algo;
-                console.log(`[Paste and Upload] Using system crypto hash: ${algo}`);
-                break;
-            }
-        }
-        
-        // If none of our preferred algorithms are available, don't use system crypto
-        // This ensures we fall back to md5.js which is known to work
-        if (!selectedHashAlgorithm) {
-            systemCrypto = null;
-            console.log('[Paste and Upload] Preferred hash algorithms not available in system crypto, using md5.js fallback');
+    childProcess = require('child_process');
+} catch (error) {
+    console.log('[Paste and Upload] child_process not available');
+}
+
+// Check for xxHash command-line tools
+if (childProcess) {
+    const xxhashTools = [
+        { cmd: 'xxhsum', algo: 'xxhsum' },
+        { cmd: 'xxh128sum', algo: 'xxh128sum' },
+        { cmd: 'xxh64sum', algo: 'xxh64sum' },
+        { cmd: 'xxh32sum', algo: 'xxh32sum' }
+    ];
+    
+    for (const tool of xxhashTools) {
+        try {
+            // Try to execute the command with version flag to check if it exists
+            childProcess.execSync(`which ${tool.cmd}`, { encoding: 'utf8', stdio: 'pipe' });
+            selectedHashCommand = tool.cmd;
+            selectedHashAlgorithm = tool.algo;
+            console.log(`[Paste and Upload] Using xxHash command-line tool: ${tool.cmd}`);
+            break;
+        } catch (error) {
+            // Tool not available, continue to next
         }
     }
-} catch (error) {
-    console.log('[Paste and Upload] System crypto not available, using md5.js fallback');
+}
+
+// If no xxHash command-line tool found, try to load system crypto
+if (!selectedHashCommand) {
+    try {
+        systemCrypto = require('crypto');
+        if (systemCrypto) {
+            const availableHashes = systemCrypto.getHashes();
+            
+            // Priority order: xxHash series (if available in crypto) > blake2b512 > blake2s256 > md5 (by performance)
+            // For file deduplication, we don't need cryptographic security
+            const hashPriority = ['xxh128', 'xxh64', 'xxh32', 'blake2b512', 'blake2s256', 'md5'];
+            
+            for (const algo of hashPriority) {
+                if (availableHashes.includes(algo)) {
+                    selectedHashAlgorithm = algo;
+                    console.log(`[Paste and Upload] Using system crypto hash: ${algo}`);
+                    break;
+                }
+            }
+            
+            // If none of our preferred algorithms are available, don't use system crypto
+            // This ensures we fall back to md5.js which is known to work
+            if (!selectedHashAlgorithm) {
+                systemCrypto = null;
+                console.log('[Paste and Upload] Preferred hash algorithms not available in system crypto, using md5.js fallback');
+            }
+        }
+    } catch (error) {
+        console.log('[Paste and Upload] System crypto not available, using md5.js fallback');
+    }
 }
 
 /**
  * Calculate hash for data using the best available method
+ * Priority: xxHash command-line tools > system crypto > md5.js
  * @param data Buffer to hash
  * @returns Hex-encoded hash string
  */
 function calculateHash(data: Uint8Array): string {
+    // Try to use command-line hash tool (e.g., xxHash)
+    if (selectedHashCommand && childProcess) {
+        try {
+            const result = childProcess.execSync(selectedHashCommand, {
+                input: data,
+                encoding: 'utf8',
+                stdio: ['pipe', 'pipe', 'pipe']
+            });
+            // Parse the output to get just the hash (first token)
+            const hash = result.trim().split(/\s+/)[0];
+            return hash;
+        } catch (error) {
+            console.warn(`[Paste and Upload] Failed to use ${selectedHashCommand}, falling back to next method:`, error);
+            // Fall through to next method
+        }
+    }
+    
+    // Try to use system crypto
     if (systemCrypto && selectedHashAlgorithm) {
         // Use system crypto for better performance
         return systemCrypto.createHash(selectedHashAlgorithm).update(data).digest('hex');
@@ -153,7 +206,7 @@ const acceptHeader = "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*
 /**
  * Calculate hash for a file's data
  * This is used for cache lookups to identify identical files
- * Uses the best available hash algorithm (system crypto > md5.js fallback)
+ * Uses the best available hash algorithm (xxHash command-line tools > system crypto > md5.js fallback)
  */
 export function calculateFileHash(file: ResourceFile): string {
     return calculateHash(file.data);
