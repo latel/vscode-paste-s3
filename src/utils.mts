@@ -34,13 +34,16 @@ if (childProcess) {
         try {
             // Try to run the command with --version to check if it exists
             // This is more cross-platform than using 'which'
-            childProcess.execFileSync(tool, ['--version'], { stdio: 'pipe' });
+            // Add timeout to prevent indefinite blocking during startup
+            childProcess.execFileSync(tool, ['--version'], { 
+                stdio: 'pipe',
+                timeout: 1000 // 1 second timeout
+            });
             selectedHashCommand = tool;
-            selectedHashAlgorithm = tool;
             console.log(`[Paste and Upload] Using xxHash command-line tool: ${tool}`);
             break;
         } catch (error) {
-            // Tool not available, continue to next
+            // Tool not available or timed out, continue to next
         }
     }
 }
