@@ -25,20 +25,16 @@ try {
 
 // Check for xxHash command-line tools
 if (childProcess) {
-    const xxhashTools = [
-        { cmd: 'xxhsum', algo: 'xxhsum' },
-        { cmd: 'xxh128sum', algo: 'xxh128sum' },
-        { cmd: 'xxh64sum', algo: 'xxh64sum' },
-        { cmd: 'xxh32sum', algo: 'xxh32sum' }
-    ];
+    const xxhashTools = ['xxhsum', 'xxh128sum', 'xxh64sum', 'xxh32sum'];
     
     for (const tool of xxhashTools) {
         try {
-            // Try to execute the command with version flag to check if it exists
-            childProcess.execSync(`which ${tool.cmd}`, { encoding: 'utf8', stdio: 'pipe' });
-            selectedHashCommand = tool.cmd;
-            selectedHashAlgorithm = tool.algo;
-            console.log(`[Paste and Upload] Using xxHash command-line tool: ${tool.cmd}`);
+            // Try to run the command with --version to check if it exists
+            // This is more cross-platform than using 'which'
+            childProcess.execFileSync(tool, ['--version'], { stdio: 'pipe' });
+            selectedHashCommand = tool;
+            selectedHashAlgorithm = tool;
+            console.log(`[Paste and Upload] Using xxHash command-line tool: ${tool}`);
             break;
         } catch (error) {
             // Tool not available, continue to next
@@ -87,14 +83,23 @@ function calculateHash(data: Uint8Array): string {
     // Try to use command-line hash tool (e.g., xxHash)
     if (selectedHashCommand && childProcess) {
         try {
-            const result = childProcess.execSync(selectedHashCommand, {
+            // Use execFileSync instead of execSync for better security
+            // Pass the command and arguments separately to avoid shell injection
+            const result = childProcess.execFileSync(selectedHashCommand, [], {
                 input: data,
                 encoding: 'utf8',
                 stdio: ['pipe', 'pipe', 'pipe']
             });
             // Parse the output to get just the hash (first token)
+            // xxHash tools typically output: <hash>  <filename> or just <hash>
             const hash = result.trim().split(/\s+/)[0];
-            return hash;
+            
+            // Validate that the hash is a valid hexadecimal string
+            if (/^[0-9a-f]+$/i.test(hash)) {
+                return hash.toLowerCase();
+            } else {
+                throw new Error(`Invalid hash format: ${hash}`);
+            }
         } catch (error) {
             console.warn(`[Paste and Upload] Failed to use ${selectedHashCommand}, falling back to next method:`, error);
             // Fall through to next method
