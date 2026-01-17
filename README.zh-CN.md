@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="https://github.com/Duanyll/paste-and-upload/blob/master/assets/icon.png?raw=true" />
+  <img src="https://github.com/latel/vscode-paste-s3/blob/master/assets/icon.png?raw=true" />
 </p>
 
 # 粘贴并上传
 
-[![](https://img.shields.io/badge/Visual_Studio_Marketplace-Download-blue)](https://marketplace.visualstudio.com/items?itemName=duanyll.paste-and-upload) [![](https://img.shields.io/badge/Open_VSX-Download-blue)](https://open-vsx.org/extension/duanyll/paste-and-upload) [![](https://img.shields.io/badge/GitHub-Source-blue)](https://github.com/duanyll/paste-and-upload)
+[![](https://img.shields.io/badge/Visual_Studio_Marketplace-Download-blue)](https://marketplace.visualstudio.com/items?itemName=duanyll.paste-s3) [![](https://img.shields.io/badge/Open_VSX-Download-blue)](https://open-vsx.org/extension/duanyll/paste-s3) [![](https://img.shields.io/badge/GitHub-Source-blue)](https://github.com/latel/vscode-paste-s3)
 
 这个扩展允许您直接从剪贴板粘贴图片（和其他文件），将它们上传到 S3 存储桶或保存到工作区，然后插入指向图片的链接。它使用 `DocumentPaste` 和 `DocumentDrop` API，可在远程工作区中使用。
 
