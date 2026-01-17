@@ -46,13 +46,9 @@ export class S3Uploader implements ResourceUploader {
         const baseConfig: S3ClientConfig = {
             region: this.s3Option.region,
             endpoint: this.s3Option.endpoint,
-            credentials
+            credentials,
+            forcePathStyle: this.s3Option.forcePathStyle
         };
-        
-        // Add forcePathStyle if set
-        if (this.s3Option.forcePathStyle !== undefined) {
-            baseConfig.forcePathStyle = this.s3Option.forcePathStyle;
-        }
         
         // Parse and merge additional client options
         let additionalOptions: Record<string, unknown> = {};
@@ -65,7 +61,8 @@ export class S3Uploader implements ResourceUploader {
                     vscode.window.showErrorMessage('Invalid s3.clientOptions: Expected a JSON object. Example: {"key": "value"}');
                 }
             } catch (e) {
-                vscode.window.showErrorMessage(`Invalid JSON in s3.clientOptions: ${e}. Expected format: {"key": "value"}`);
+                const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+                vscode.window.showErrorMessage(`Invalid JSON in s3.clientOptions: ${errorMessage}. Expected format: {"key": "value"}`);
             }
         }
         
