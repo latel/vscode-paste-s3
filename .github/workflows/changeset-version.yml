@@ -21,20 +21,25 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'yarn'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Create Release PR
         id: changesets
         uses: changesets/action@v1
         with:
-          version: yarn changeset version
+          version: pnpm changeset version
           commit: 'chore: version packages'
           title: 'chore: version packages'
         env:
