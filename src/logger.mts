@@ -14,7 +14,7 @@ export enum LogLevel {
  * Centralized logger that writes to VSCode Output channel
  * Provides structured logging with timestamps and log levels
  */
-export class Logger {
+export class Logger implements vscode.Disposable {
     private static instance: Logger;
     private outputChannel: vscode.OutputChannel;
     private logLevel: LogLevel = LogLevel.INFO;
@@ -45,9 +45,19 @@ export class Logger {
      */
     private format(level: string, message: string, ...args: any[]): string {
         const timestamp = new Date().toISOString();
-        const formattedArgs = args.length > 0 ? ' ' + args.map(arg => 
-            typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-        ).join(' ') : '';
+        const formattedArgs = args.length > 0 ? ' ' + args.map(arg => {
+            if (typeof arg === 'object') {
+                try {
+                    const str = JSON.stringify(arg);
+                    // Limit object string length to avoid excessive output
+                    return str.length > 500 ? str.substring(0, 500) + '...' : str;
+                } catch (e) {
+                    // Handle circular references or non-serializable objects
+                    return '[Object]';
+                }
+            }
+            return String(arg);
+        }).join(' ') : '';
         return `[${timestamp}] [${level}] ${message}${formattedArgs}`;
     }
 
