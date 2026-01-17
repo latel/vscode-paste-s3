@@ -58,7 +58,7 @@ function calculateHash(data: Uint8Array): string {
     }
 }
 
-const extensionConfig = vscode.workspace.getConfiguration('paste-and-upload');
+const extensionConfig = vscode.workspace.getConfiguration('paste-s3');
 
 export async function inspectDataTransfer(dataTransfer: vscode.DataTransfer) {
     let count = 0;
@@ -169,7 +169,7 @@ export function calculateFileHash(file: ResourceFile): string {
  * - No undo functionality for cached uploads (since no actual upload occurs)
  */
 export class UploadCache {
-    private static readonly CACHE_KEY = 'paste-and-upload.uploadCache';
+    private static readonly CACHE_KEY = 'paste-s3.uploadCache';
     private static readonly MAX_CACHE_SIZE = 1000; // Maximum number of cached entries
 
     constructor(private context: vscode.ExtensionContext) {}

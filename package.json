@@ -1,5 +1,5 @@
 {
-  "name": "paste-and-upload",
+  "name": "paste-s3",
   "version": "0.3.1",
   "publisher": "duanyll",
   "engines": {
@@ -36,7 +36,7 @@
       "supported": "limited",
       "description": "The extension does not read S3 credentials from untrusted workspaces.",
       "restrictedConfigurations": [
-        "paste-and-upload.s3"
+        "paste-s3.s3"
       ]
     }
   },
@@ -44,90 +44,90 @@
   "contributes": {
     "commands": [
       {
-        "command": "paste-and-upload.testS3Connection",
+        "command": "paste-s3.testS3Connection",
         "title": "%command.testS3Connection.title%"
       },
       {
-        "command": "paste-and-upload.undoRecentUpload",
+        "command": "paste-s3.undoRecentUpload",
         "title": "%command.undoRecentUpload.title%"
       }
     ],
     "configuration": {
       "title": "%configuration.title%",
       "properties": {
-        "paste-and-upload.s3.region": {
+        "paste-s3.s3.region": {
           "type": "string",
           "default": "",
           "description": "%configuration.s3.region.description%"
         },
-        "paste-and-upload.s3.endpoint": {
+        "paste-s3.s3.endpoint": {
           "type": "string",
           "default": "",
           "description": "%configuration.s3.endpoint.description%"
         },
-        "paste-and-upload.s3.accessKeyId": {
+        "paste-s3.s3.accessKeyId": {
           "type": "string",
           "default": "",
           "description": "%configuration.s3.accessKeyId.description%"
         },
-        "paste-and-upload.s3.secretAccessKey": {
+        "paste-s3.s3.secretAccessKey": {
           "type": "string",
           "default": "",
           "description": "%configuration.s3.secretAccessKey.description%"
         },
-        "paste-and-upload.s3.bucket": {
+        "paste-s3.s3.bucket": {
           "type": "string",
           "default": "",
           "description": "%configuration.s3.bucket.description%"
         },
-        "paste-and-upload.s3.prefix": {
+        "paste-s3.s3.prefix": {
           "type": "string",
           "default": "",
           "markdownDescription": "%configuration.s3.prefix.description%"
         },
-        "paste-and-upload.s3.publicUrlBase": {
+        "paste-s3.s3.publicUrlBase": {
           "type": "string",
           "default": "",
           "markdownDescription": "%configuration.s3.publicUrlBase.description%"
         },
-        "paste-and-upload.s3.omitExtension": {
+        "paste-s3.s3.omitExtension": {
           "type": "boolean",
           "default": false,
           "description": "%configuration.s3.omitExtension.description%"
         },
-        "paste-and-upload.s3.skipExisting": {
+        "paste-s3.s3.skipExisting": {
           "type": "boolean",
           "default": true,
           "description": "%configuration.s3.skipExisting.description%"
         },
-        "paste-and-upload.s3.forcePathStyle": {
+        "paste-s3.s3.forcePathStyle": {
           "type": "boolean",
           "default": false,
           "description": "%configuration.s3.forcePathStyle.description%"
         },
-        "paste-and-upload.s3.clientOptions": {
+        "paste-s3.s3.clientOptions": {
           "type": "string",
           "default": "{}",
           "markdownDescription": "%configuration.s3.clientOptions.description%"
         },
-        "paste-and-upload.workspace.path": {
+        "paste-s3.workspace.path": {
           "type": "string",
           "default": "images",
           "description": "%configuration.workspace.path.description%"
         },
-        "paste-and-upload.workspace.linkBase": {
+        "paste-s3.workspace.linkBase": {
           "type": "string",
           "default": "images/",
           "description": "%configuration.workspace.linkBase.description%"
         },
-        "paste-and-upload.enabled": {
+        "paste-s3.enabled": {
           "type": "boolean",
           "default": true,
           "scope": "language-overridable",
           "description": "%configuration.enabled.description%",
           "order": 0
         },
-        "paste-and-upload.uploadDestination": {
+        "paste-s3.uploadDestination": {
           "type": "string",
           "default": "s3",
           "enum": [
@@ -142,13 +142,13 @@
           "description": "%configuration.uploadDestination.description%",
           "order": 1
         },
-        "paste-and-upload.fileSizeLimit": {
+        "paste-s3.fileSizeLimit": {
           "type": "integer",
           "default": 10000000,
           "scope": "language-overridable",
           "description": "%configuration.fileSizeLimit.description%"
         },
-        "paste-and-upload.allowMultipleFiles": {
+        "paste-s3.allowMultipleFiles": {
           "type": "string",
           "default": "prompt",
           "enum": [
@@ -159,7 +159,7 @@
           "scope": "language-overridable",
           "description": "%configuration.allowMultipleFiles.description%"
         },
-        "paste-and-upload.mimeTypeDetectionMethod": {
+        "paste-s3.mimeTypeDetectionMethod": {
           "type": "string",
           "default": "content",
           "enum": [
@@ -180,13 +180,13 @@
           "scope": "language-overridable",
           "description": "%configuration.mimeTypeDetectionMethod.description%"
         },
-        "paste-and-upload.keepOriginalFilename": {
+        "paste-s3.keepOriginalFilename": {
           "type": "boolean",
           "default": false,
           "scope": "language-overridable",
           "markdownDescription": "%configuration.keepOriginalFilename.description%"
         },
-        "paste-and-upload.fileNamingMethod": {
+        "paste-s3.fileNamingMethod": {
           "type": "string",
           "default": "md5Short",
           "enum": [
@@ -220,38 +220,38 @@
           "markdownDescription": "%configuration.fileNamingMethod.description%",
           "order": 2
         },
-        "paste-and-upload.defaultSnippet": {
+        "paste-s3.defaultSnippet": {
           "type": "string",
           "default": "${url}",
           "scope": "language-overridable",
           "markdownDescription": "%configuration.defaultSnippet.description%",
           "order": 3
         },
-        "paste-and-upload.imageSnippet": {
+        "paste-s3.imageSnippet": {
           "type": "string",
           "default": "${url}",
           "scope": "language-overridable",
           "markdownDescription": "%configuration.imageSnippet.description%",
           "order": 4
         },
-        "paste-and-upload.undoLimit": {
+        "paste-s3.undoLimit": {
           "type": "integer",
           "default": 10,
           "markdownDescription": "%configuration.undoLimit.description%"
         },
-        "paste-and-upload.mimeTypeFilter": {
+        "paste-s3.mimeTypeFilter": {
           "type": "string",
           "default": "",
           "markdownDescription": "%configuration.mimeTypeFilter.description%",
           "order": 5
         },
-        "paste-and-upload.ignoreWorkspaceFiles": {
+        "paste-s3.ignoreWorkspaceFiles": {
           "type": "boolean",
           "default": true,
           "markdownDescription": "%configuration.ignoreWorkspaceFiles.description%",
           "order": 6
         },
-        "paste-and-upload.retrieveOriginalImage": {
+        "paste-s3.retrieveOriginalImage": {
           "type": "boolean",
           "default": true,
           "markdownDescription": "%configuration.retrieveOriginalImage.description%",
@@ -261,13 +261,13 @@
     },
     "configurationDefaults": {
       "[markdown]": {
-        "paste-and-upload.defaultSnippet": "[${1:$TM_SELECTED_TEXT}](${url})",
-        "paste-and-upload.imageSnippet": "![${1:$TM_SELECTED_TEXT}](${url})"
+        "paste-s3.defaultSnippet": "[${1:$TM_SELECTED_TEXT}](${url})",
+        "paste-s3.imageSnippet": "![${1:$TM_SELECTED_TEXT}](${url})"
       },
       "[tex][latex]": {
-        "paste-and-upload.uploadDestination": "workspace",
-        "paste-and-upload.fileNamingMethod": "prompt",
-        "paste-and-upload.imageSnippet": "\\includegraphics{${url}}"
+        "paste-s3.uploadDestination": "workspace",
+        "paste-s3.fileNamingMethod": "prompt",
+        "paste-s3.imageSnippet": "\\includegraphics{${url}}"
       }
     }
   },

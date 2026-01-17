@@ -8,7 +8,7 @@ export class WorkspaceUploader implements ResourceUploader {
     
     constructor(context: vscode.ExtensionContext){
         this.cache = new UploadCache(context);
-        const workspaceSection = vscode.workspace.getConfiguration('paste-and-upload.workspace');
+        const workspaceSection = vscode.workspace.getConfiguration('paste-s3.workspace');
         this.options = {
             path: workspaceSection.get<string>('path') ?? '',
             linkBase: workspaceSection.get<string>('linkBase') ?? '',
