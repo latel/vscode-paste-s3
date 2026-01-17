@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import _ from 'lodash';
-import { S3Client, DeleteObjectCommand, HeadObjectCommand, S3ServiceException } from '@aws-sdk/client-s3';
+import { S3Client, DeleteObjectCommand, HeadObjectCommand, S3ServiceException, S3ClientConfig } from '@aws-sdk/client-s3';
 import { Upload } from "@aws-sdk/lib-storage";
 import { filesize } from 'filesize';
 import { ResourceFile, ResourceUploader, ResourceUploadResult, S3Options } from './common.mjs';
@@ -37,11 +37,11 @@ export class S3Uploader implements ResourceUploader {
     }
 
     private parseClientOptions(clientOptionsJson?: string): Record<string, any> | undefined {
-        if (!clientOptionsJson || _.isEmpty(clientOptionsJson)) {
+        if (_.isEmpty(clientOptionsJson)) {
             return undefined;
         }
         try {
-            const parsed = JSON.parse(clientOptionsJson);
+            const parsed = JSON.parse(clientOptionsJson!);
             if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
                 vscode.window.showWarningMessage('S3 client options must be a JSON object. Ignoring invalid configuration.');
                 return undefined;
@@ -60,16 +60,12 @@ export class S3Uploader implements ResourceUploader {
         } : undefined;
         
         // Base configuration
-        const baseConfig: any = {
+        const baseConfig: S3ClientConfig = {
             region: this.s3Option.region,
             endpoint: this.s3Option.endpoint,
-            credentials
+            credentials,
+            forcePathStyle: this.s3Option.forcePathStyle
         };
-        
-        // Add forcePathStyle if configured
-        if (this.s3Option.forcePathStyle !== undefined) {
-            baseConfig.forcePathStyle = this.s3Option.forcePathStyle;
-        }
         
         // Merge with additional client options
         const finalConfig = this.s3Option.clientOptions 
