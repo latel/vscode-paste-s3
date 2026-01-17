@@ -104,7 +104,7 @@ Personal Access Token for publishing to Open VSX Registry.
 **Option 1: Using Changesets (Recommended for ongoing development)**
 1. Create a changeset for your changes:
    ```bash
-   yarn changeset
+   pnpm changeset
    ```
 2. Follow the prompts to select version bump type and describe changes
 3. Commit the changeset file (`.changeset/*.md`)
@@ -137,7 +137,7 @@ This project now uses [Changesets](https://github.com/changesets/changesets) for
 
 1. **Creating a changeset:**
    ```bash
-   yarn changeset
+   pnpm changeset
    ```
    This will prompt you to:
    - Select the type of version bump (patch/minor/major)
@@ -168,19 +168,19 @@ Before pushing, you can test the build locally:
 
 ```bash
 # Install dependencies
-yarn install
+pnpm install
 
 # Run linter
-yarn run lint
+pnpm run lint
 
 # Build the extension
-yarn run package
+pnpm run package
 
 # Run tests
-yarn test
+pnpm test
 
 # Package the extension
-yarn vsce package
+pnpm vsce package
 ```
 
 ## Troubleshooting
