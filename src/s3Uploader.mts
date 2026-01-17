@@ -207,7 +207,7 @@ export class S3Uploader implements ResourceUploader {
         }
     }
 
-    public async uploadFile(file: ResourceFile): Promise<ResourceUploadResult> {
+    public async uploadFile(file: ResourceFile, doucumentUri: vscode.Uri, edit: vscode.WorkspaceEdit): Promise<ResourceUploadResult> {
         // Calculate hash for cache lookup
         const fileHash = calculateFileHash(file);
         

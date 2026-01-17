@@ -119,24 +119,27 @@ export class UploadCache {
      * Get cached URL for a file hash
      */
     getCachedUrl(hash: string): string | undefined {
-        const cache = this.context.globalState.get<Record<string, string>>(UploadCache.CACHE_KEY, {});
-        return cache[hash];
+        const cache = this.context.globalState.get<Record<string, { url: string, timestamp: number }>>(UploadCache.CACHE_KEY, {});
+        const entry = cache[hash];
+        return entry?.url;
     }
 
     /**
      * Store a file hash to URL mapping in cache
      */
     async setCachedUrl(hash: string, url: string): Promise<void> {
-        let cache = this.context.globalState.get<Record<string, string>>(UploadCache.CACHE_KEY, {});
+        let cache = this.context.globalState.get<Record<string, { url: string, timestamp: number }>>(UploadCache.CACHE_KEY, {});
         
-        // Simple size limit: if cache is too large, clear oldest half
+        // Simple size limit: if cache is too large, clear oldest entries by timestamp
         if (Object.keys(cache).length >= UploadCache.MAX_CACHE_SIZE) {
             const entries = Object.entries(cache);
+            // Sort by timestamp (oldest first) and remove oldest half
+            entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
             const half = Math.floor(entries.length / 2);
             cache = Object.fromEntries(entries.slice(half));
         }
         
-        cache[hash] = url;
+        cache[hash] = { url, timestamp: Date.now() };
         await this.context.globalState.update(UploadCache.CACHE_KEY, cache);
     }
 
