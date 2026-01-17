@@ -10,6 +10,9 @@ import { FileNamingMethod, IncompleteResourceFile, ResourceFile } from './common
 /**
  * Hash provider that prioritizes xxHash series, then system crypto functions for best performance
  * Falls back to md5.js if system crypto is unavailable
+ * 
+ * Note: Tool detection runs synchronously during module initialization for simplicity.
+ * This is acceptable since it only checks for command availability, which is fast.
  */
 let systemCrypto: typeof import('crypto') | null = null;
 let childProcess: typeof import('child_process') | null = null;
@@ -88,15 +91,18 @@ function calculateHash(data: Uint8Array): string {
             const result = childProcess.execFileSync(selectedHashCommand, [], {
                 input: data,
                 encoding: 'utf8',
-                stdio: ['pipe', 'pipe', 'pipe']
+                stdio: ['pipe', 'pipe', 'pipe'],
+                maxBuffer: 50 * 1024 * 1024 // 50MB buffer for large file hashing
             });
             // Parse the output to get just the hash (first token)
             // xxHash tools typically output: <hash>  <filename> or just <hash>
             const hash = result.trim().split(/\s+/)[0];
             
-            // Validate that the hash is a valid hexadecimal string
-            if (/^[0-9a-f]+$/i.test(hash)) {
-                return hash.toLowerCase();
+            // Validate that the hash looks like a valid hash (mostly hexadecimal)
+            // Some tools might include prefixes or formatting, so be flexible
+            const cleanHash = hash.replace(/^(0x|xxh\d+:)/i, '');
+            if (/^[0-9a-f]+$/i.test(cleanHash) && cleanHash.length >= 8) {
+                return cleanHash.toLowerCase();
             } else {
                 throw new Error(`Invalid hash format: ${hash}`);
             }
