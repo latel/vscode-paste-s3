@@ -11,7 +11,7 @@
 - 创建 Pull Request 时
 
 **功能：**
-- 安装依赖（使用 yarn）
+- 安装依赖（使用 pnpm）
 - 运行代码检查（linter）
 - 构建扩展
 - 运行测试（在无头环境中）
@@ -74,7 +74,7 @@
 ## 技术特性
 
 - ✅ 使用最新的 GitHub Actions（v4）
-- ✅ 使用 yarn 缓存加速构建
+- ✅ 使用 pnpm 缓存加速构建
 - ✅ 使用 frozen lockfile 确保可重现构建
 - ✅ 在无头环境中运行测试（xvfb）
 - ✅ 优雅处理可选的 Open VSX 发布
