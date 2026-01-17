@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import _ from 'lodash';
-import { S3Client, DeleteObjectCommand, HeadObjectCommand, S3ServiceException } from '@aws-sdk/client-s3';
+import { S3Client, S3ClientConfig, DeleteObjectCommand, HeadObjectCommand, S3ServiceException } from '@aws-sdk/client-s3';
 import { Upload } from "@aws-sdk/lib-storage";
 import { filesize } from 'filesize';
 import { ResourceFile, ResourceUploader, ResourceUploadResult, S3Options } from './common.mjs';
@@ -43,7 +43,7 @@ export class S3Uploader implements ResourceUploader {
         } : undefined;
         
         // Base configuration
-        const baseConfig: any = {
+        const baseConfig: S3ClientConfig = {
             region: this.s3Option.region,
             endpoint: this.s3Option.endpoint,
             credentials
@@ -55,12 +55,12 @@ export class S3Uploader implements ResourceUploader {
         }
         
         // Parse and merge additional client options
-        let additionalOptions = {};
+        let additionalOptions: Record<string, any> = {};
         if (this.s3Option.clientOptions) {
             try {
                 additionalOptions = JSON.parse(this.s3Option.clientOptions);
             } catch (e) {
-                vscode.window.showErrorMessage(`Invalid JSON in s3.clientOptions: ${e}`);
+                vscode.window.showErrorMessage(`Invalid JSON in s3.clientOptions: ${e}. Expected format: {"key": "value"}`);
             }
         }
         
