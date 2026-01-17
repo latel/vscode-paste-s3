@@ -32,10 +32,11 @@ try {
             }
         }
         
+        // If none of our preferred algorithms are available, don't use system crypto
+        // This ensures we fall back to md5.js which is known to work
         if (!selectedHashAlgorithm) {
-            // Fallback to any available hash if our preferred ones aren't available
-            selectedHashAlgorithm = 'sha256'; // sha256 should be universally available
-            console.log(`[Paste and Upload] Using fallback system crypto hash: ${selectedHashAlgorithm}`);
+            systemCrypto = null;
+            console.log('[Paste and Upload] Preferred hash algorithms not available in system crypto, using md5.js fallback');
         }
     }
 } catch (error) {
