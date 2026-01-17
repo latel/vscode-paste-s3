@@ -34,4 +34,4 @@ You can also manually trigger a release by merging the "Version Packages" PR or 
 
 - `.github/workflows/changeset-version.yml` - Creates version bump PRs
 - `.github/workflows/changeset-publish.yml` - Publishes when version changes on master
-- `.github/workflows/release.yml` - Manual/tag-based publishing (kept for compatibility)
+- `.github/workflows/release.yml` - Manual/tag-based publishing (still available for manual releases or tag-based releases, won't conflict with changeset workflow as it only triggers on GitHub releases/manual dispatch)

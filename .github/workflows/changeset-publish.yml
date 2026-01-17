@@ -27,21 +27,18 @@ jobs:
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "Current version: $CURRENT_VERSION"
 
-          # Get the previous version from package.json
-          git checkout HEAD~1 -- package.json 2>/dev/null \
-            || echo "First commit"
-          PREVIOUS_VERSION=$(node -p \
-            "require('./package.json').version" 2>/dev/null \
-            || echo "0.0.0")
-          echo "Previous version: $PREVIOUS_VERSION"
-
-          # Restore current package.json
-          git checkout HEAD -- package.json
+          # Get the previous version from package.json using git show
+          if PREV_CONTENT=$(git show HEAD~1:package.json 2>/dev/null); then
+            PREVIOUS_VERSION=$(echo "$PREV_CONTENT" | node -p "JSON.parse(require('fs').readFileSync(0, 'utf-8')).version")
+            echo "Previous version: $PREVIOUS_VERSION"
+          else
+            echo "First commit, no previous version"
+            PREVIOUS_VERSION="0.0.0"
+          fi
 
           # Compare versions
           if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
-            echo "Version changed from $PREVIOUS_VERSION to \
-          $CURRENT_VERSION"
+            echo "Version changed from $PREVIOUS_VERSION to $CURRENT_VERSION"
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           else
