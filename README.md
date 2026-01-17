@@ -20,6 +20,7 @@ This extension allows you to paste images (and other files) directly from your c
 - Upload images to any S3-compatible storage (Not limited to AWS S3, e.g. Aliyun OSS, Cloudflare R2, etc.)
 - Or save images to your workspace (Supports virtual workspaces like [Overleaf Workshop](https://marketplace.visualstudio.com/items?itemName=iamhyc.overleaf-workshop))
   ![Overleaf Workshop Example](assets/overleaf.gif)
+- Smart caching to avoid re-uploading identical files (based on content hash)
 
 ## Requirements
 
@@ -40,7 +41,9 @@ The S3 settings are required if you want to upload images to S3. You can configu
   // Will be prepended to S3 object key (Slashes will be preserved as is)
   "paste-s3.s3.prefix": "img/",
   // Will be prepended to inserted link (Slashes will be preserved as is)
-  "paste-s3.s3.publicUrlBase": "https://cdn.duanyll.com/img/"
+  "paste-s3.s3.publicUrlBase": "https://cdn.duanyll.com/img/",
+  // Force path style URLs for S3-compatible storage (e.g., MinIO)
+  "paste-s3.s3.forcePathStyle": true
 }
 ```
 
