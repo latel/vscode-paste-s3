@@ -29,7 +29,9 @@ export class S3Uploader implements ResourceUploader {
             prefix: emptyToUndefined(s3Section.get<string>('prefix')),
             publicUrlBase: emptyToUndefined(s3Section.get<string>('publicUrlBase')),
             omitExtension: s3Section.get<boolean>('omitExtension'),
-            skipExisting: s3Section.get<boolean>('skipExisting')
+            skipExisting: s3Section.get<boolean>('skipExisting'),
+            forcePathStyle: s3Section.get<boolean>('forcePathStyle'),
+            clientOptions: emptyToUndefined(s3Section.get<string>('clientOptions'))
         };
         this.client = this.createClient();
     }
@@ -39,11 +41,33 @@ export class S3Uploader implements ResourceUploader {
             accessKeyId: this.s3Option.accessKeyId,
             secretAccessKey: this.s3Option.secretAccessKey
         } : undefined;
-        return new S3Client({
+        
+        // Base configuration
+        const baseConfig: any = {
             region: this.s3Option.region,
             endpoint: this.s3Option.endpoint,
             credentials
-        });
+        };
+        
+        // Add forcePathStyle if set
+        if (this.s3Option.forcePathStyle !== undefined) {
+            baseConfig.forcePathStyle = this.s3Option.forcePathStyle;
+        }
+        
+        // Parse and merge additional client options
+        let additionalOptions = {};
+        if (this.s3Option.clientOptions) {
+            try {
+                additionalOptions = JSON.parse(this.s3Option.clientOptions);
+            } catch (e) {
+                vscode.window.showErrorMessage(`Invalid JSON in s3.clientOptions: ${e}`);
+            }
+        }
+        
+        // Merge configurations (additionalOptions will override baseConfig if there are conflicts)
+        const finalConfig = { ...baseConfig, ...additionalOptions };
+        
+        return new S3Client(finalConfig);
     }
 
     private async checkIfObjectExists(key: string): Promise<boolean> {

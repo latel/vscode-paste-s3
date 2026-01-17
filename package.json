@@ -80,6 +80,16 @@
           "default": "",
           "description": "The bucket of the S3-compatible storage. Must be set."
         },
+        "paste-and-upload.s3.forcePathStyle": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to force path style URLs for S3 objects. Set to true for S3-compatible storage that requires path-style addressing (e.g., MinIO)."
+        },
+        "paste-and-upload.s3.clientOptions": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Additional S3 client options in JSON format. These options will be merged into the S3 client constructor parameters. For example: `{\"requestHandler\": {\"requestTimeout\": 30000}}`. Leave empty if not needed."
+        },
         "paste-and-upload.s3.prefix": {
           "type": "string",
           "default": "",

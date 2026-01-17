@@ -53,6 +53,8 @@ export interface S3Options {
     publicUrlBase?: string;
     omitExtension?: boolean;
     skipExisting?: boolean;
+    forcePathStyle?: boolean;
+    clientOptions?: string;
 }
 
 export interface WorkspaceOptions {
