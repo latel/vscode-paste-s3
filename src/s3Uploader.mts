@@ -55,10 +55,15 @@ export class S3Uploader implements ResourceUploader {
         }
         
         // Parse and merge additional client options
-        let additionalOptions: Record<string, any> = {};
+        let additionalOptions: Record<string, unknown> = {};
         if (this.s3Option.clientOptions) {
             try {
-                additionalOptions = JSON.parse(this.s3Option.clientOptions);
+                const parsed = JSON.parse(this.s3Option.clientOptions);
+                if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+                    additionalOptions = parsed;
+                } else {
+                    vscode.window.showErrorMessage('Invalid s3.clientOptions: Expected a JSON object. Example: {"key": "value"}');
+                }
             } catch (e) {
                 vscode.window.showErrorMessage(`Invalid JSON in s3.clientOptions: ${e}. Expected format: {"key": "value"}`);
             }
