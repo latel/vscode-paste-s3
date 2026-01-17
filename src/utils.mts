@@ -82,6 +82,12 @@ if (!selectedHashCommand) {
 /**
  * Calculate hash for data using the best available method
  * Priority: xxHash command-line tools > system crypto > md5.js
+ * 
+ * Note: This function uses synchronous operations for simplicity and consistency.
+ * For large files, this will block the event loop during hash calculation.
+ * This is acceptable for the paste-and-upload use case where files are typically
+ * small to medium sized (images, etc.), and the operation is user-initiated.
+ * 
  * @param data Buffer to hash
  * @returns Hex-encoded hash string
  */
@@ -99,11 +105,16 @@ function calculateHash(data: Uint8Array): string {
             });
             // Parse the output to get just the hash (first token)
             // xxHash tools typically output: <hash>  <filename> or just <hash>
-            const hash = result.trim().split(/\s+/)[0];
+            const trimmedOutput = result.trim();
+            if (!trimmedOutput) {
+                throw new Error('Empty output from hash command');
+            }
+            const hash = trimmedOutput.split(/\s+/)[0];
             
             // Validate that the hash looks like a valid hash (mostly hexadecimal)
             // Some tools might include prefixes or formatting, so be flexible
             const cleanHash = hash.replace(/^(0x|xxh\d+:)/i, '');
+            // Note: Minimum 8 characters covers all xxHash variants (xxh32=8, xxh64=16, xxh128=32)
             if (/^[0-9a-f]+$/i.test(cleanHash) && cleanHash.length >= 8) {
                 return cleanHash.toLowerCase();
             } else {
