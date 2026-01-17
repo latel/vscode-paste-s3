@@ -31,37 +31,37 @@
 
 ```jsonc
 {
-  "paste-and-upload.s3.region": "oss-cn-hongkong",
+  "paste-s3.s3.region": "oss-cn-hongkong",
   // 如果您不使用 AWS S3，需要设置端点
-  "paste-and-upload.s3.endpoint": "https://oss-cn-hongkong.aliyuncs.com",
-  "paste-and-upload.s3.accessKeyId": "YourAccessKeyId",
-  "paste-and-upload.s3.secretAccessKey": "YourSecretAccessKey",
-  "paste-and-upload.s3.bucket": "your-bucket-name",
+  "paste-s3.s3.endpoint": "https://oss-cn-hongkong.aliyuncs.com",
+  "paste-s3.s3.accessKeyId": "YourAccessKeyId",
+  "paste-s3.s3.secretAccessKey": "YourSecretAccessKey",
+  "paste-s3.s3.bucket": "your-bucket-name",
   // 将添加到 S3 对象键的前缀（斜杠将被保留）
-  "paste-and-upload.s3.prefix": "img/",
+  "paste-s3.s3.prefix": "img/",
   // 将添加到插入链接的前缀（斜杠将被保留）
-  "paste-and-upload.s3.publicUrlBase": "https://cdn.duanyll.com/img/"
+  "paste-s3.s3.publicUrlBase": "https://cdn.duanyll.com/img/"
 }
 ```
 
 建议在用户设置中配置 S3 凭据，以避免泄露。配置 S3 相关选项后，您可以按 `Ctrl+Shift+P` 并搜索 `粘贴并上传: 测试 S3 连接` 来验证您的设置。
 
-所有设置都可以通过工作区设置覆盖。直接属于 `paste-and-upload` 部分的设置可以通过特定语言的设置覆盖。例如，以下配置将为 Markdown 和 LaTeX 启用 paste-and-upload，并将 Markdown 的图片上传到 S3，将 LaTeX 的图片保存到工作区：
+所有设置都可以通过工作区设置覆盖。直接属于 `paste-s3` 部分的设置可以通过特定语言的设置覆盖。例如，以下配置将为 Markdown 和 LaTeX 启用 paste-s3，并将 Markdown 的图片上传到 S3，将 LaTeX 的图片保存到工作区：
 
 ```jsonc
 {
-  "paste-and-upload.enabled": false,
+  "paste-s3.enabled": false,
   // 保存为 ${workspaceFolder}/figures/image.png
-  "paste-and-upload.workspace.path": "figures",
+  "paste-s3.workspace.path": "figures",
   // 插入 \includegraphics{image.png}（如果您有 \graphicspath{figures}）
-  "paste-and-upload.workspace.linkBase": "",
+  "paste-s3.workspace.linkBase": "",
   "[markdown]": {
-    "paste-and-upload.enabled": true,
-    "paste-and-upload.uploadDestination": "s3"
+    "paste-s3.enabled": true,
+    "paste-s3.uploadDestination": "s3"
   },
   "[latex]": {
-    "paste-and-upload.enabled": true,
-    "paste-and-upload.uploadDestination": "workspace"
+    "paste-s3.enabled": true,
+    "paste-s3.uploadDestination": "workspace"
   }
 }
 ```
@@ -70,13 +70,13 @@
 
 | 名称                                    | 描述                               | 默认值     | Markdown 默认值                     |
 | --------------------------------------- | ---------------------------------- | ---------- | ----------------------------------- |
-| `paste-and-upload.enabled`              | 启用或禁用扩展                     | `true`     |                                     |
-| `paste-and-upload.uploadDestination`    | 图片上传的目标位置                 | `s3`       |                                     |
-| `paste-and-upload.fileNamingMethod`     | 如何命名上传的文件                 | `md5short` |                                     |
-| `paste-and-upload.defaultSnippet`       | 要插入的默认代码片段               | `$url`     | `[${1:$TM_SELECTED_TEXT}](${url})`  |
-| `paste-and-upload.imageSnippet`         | 图片的代码片段                     | `$url`     | `![${1:$TM_SELECTED_TEXT}](${url})` |
-| `paste-and-upload.mimeTypeFilter`       | 通过 MIME 类型过滤粘贴文件的正则表达式 | `""`       |                                     |
-| `paste-and-upload.ignoreWorkspaceFiles` | 忽略工作区中已有的文件             | `true`     |                                     |
+| `paste-s3.enabled`              | 启用或禁用扩展                     | `true`     |                                     |
+| `paste-s3.uploadDestination`    | 图片上传的目标位置                 | `s3`       |                                     |
+| `paste-s3.fileNamingMethod`     | 如何命名上传的文件                 | `md5short` |                                     |
+| `paste-s3.defaultSnippet`       | 要插入的默认代码片段               | `$url`     | `[${1:$TM_SELECTED_TEXT}](${url})`  |
+| `paste-s3.imageSnippet`         | 图片的代码片段                     | `$url`     | `![${1:$TM_SELECTED_TEXT}](${url})` |
+| `paste-s3.mimeTypeFilter`       | 通过 MIME 类型过滤粘贴文件的正则表达式 | `""`       |                                     |
+| `paste-s3.ignoreWorkspaceFiles` | 忽略工作区中已有的文件             | `true`     |                                     |
 
 此扩展使用原生 VS Code API 来粘贴图片，请同时参考 VS Code 设置中的 `粘贴为` 和 `拖放` 部分，以控制粘贴和拖放文件的行为，以及此扩展的优先级。
 

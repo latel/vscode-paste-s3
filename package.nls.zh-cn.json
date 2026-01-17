@@ -40,7 +40,7 @@
   
   "configuration.keepOriginalFilename.description": "上传文件时保留原始文件名。如果禁用，将生成随机名称。像 `image.png` 这样的默认文件名将始终被重命名。",
   
-  "configuration.fileNamingMethod.description": "当 `#paste-and-upload.keepOriginalFilename#` 被禁用时，或剪贴板未提供文件名时，用于生成文件名的方法。",
+  "configuration.fileNamingMethod.description": "当 `#paste-s3.keepOriginalFilename#` 被禁用时，或剪贴板未提供文件名时，用于生成文件名的方法。",
   "configuration.fileNamingMethod.enumItemLabel.md5": "MD5 哈希",
   "configuration.fileNamingMethod.enumItemLabel.md5Short": "短 MD5 哈希",
   "configuration.fileNamingMethod.enumItemLabel.uuid": "UUID",
