@@ -216,9 +216,9 @@ export class S3Uploader implements ResourceUploader {
         if (cachedUrl) {
             console.log(`Using cached URL for file hash ${fileHash}: ${cachedUrl}`);
             // Return cached URL without uploading
+            // Note: No undo provided for cached results since no upload occurred
             return {
                 uri: cachedUrl,
-                // Note: We don't provide undo for cached uploads since the file wasn't uploaded this time
             };
         }
         

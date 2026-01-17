@@ -101,6 +101,7 @@ const acceptHeader = "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*
 
 /**
  * Calculate MD5 hash for a file's data
+ * This is used for cache lookups to identify identical files
  */
 export function calculateFileHash(file: ResourceFile): string {
     return new MD5().update(file.data).digest('hex');
@@ -108,6 +109,12 @@ export function calculateFileHash(file: ResourceFile): string {
 
 /**
  * Upload cache manager to avoid re-uploading the same file
+ * 
+ * Design notes:
+ * - Uses timestamp-based LRU eviction when cache reaches MAX_CACHE_SIZE
+ * - Eviction triggers on write when at capacity (acceptable for 1000 entries)
+ * - Cache persists across VSCode sessions via globalState
+ * - No undo functionality for cached uploads (since no actual upload occurs)
  */
 export class UploadCache {
     private static readonly CACHE_KEY = 'paste-and-upload.uploadCache';
