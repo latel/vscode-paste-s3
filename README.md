@@ -8,6 +8,8 @@
 
 This extension allows you to paste images (and other files) directly from your clipboard, upload them to a S3 bucket or save them to your workspace, then insert a link pointing to the image. It utilizes the `DocumentPaste` and `DocumentDrop` API and works on remote workspaces.
 
+**🌏 Language Support**: This extension now supports Chinese (Simplified) localization. The interface will automatically display in Chinese if your VS Code is set to Chinese language.
+
 ## Features
 
 - Fetch images from clipboard with VS Code API, even in remote workspaces. No extra hotkeys required, simply press `Ctrl+V` to paste images!
