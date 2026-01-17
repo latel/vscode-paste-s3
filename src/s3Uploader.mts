@@ -38,7 +38,7 @@ export class S3Uploader implements ResourceUploader {
     }
 
     private parseClientOptions(clientOptionsJson?: string): Record<string, any> | undefined {
-        // Skip if empty or undefined, but allow the default empty object '{}'
+        // Handle undefined, null, empty string, or default empty object '{}'
         if (!clientOptionsJson) {
             return undefined;
         }
@@ -49,7 +49,7 @@ export class S3Uploader implements ResourceUploader {
         }
         
         try {
-            const parsed = JSON.parse(clientOptionsJson);
+            const parsed = JSON.parse(trimmed);
             if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
                 vscode.window.showWarningMessage('S3 client options must be a JSON object. Ignoring invalid configuration.');
                 return undefined;
@@ -80,9 +80,13 @@ export class S3Uploader implements ResourceUploader {
         const baseConfig: S3ClientConfig = {
             region: this.s3Option.region,
             endpoint: this.s3Option.endpoint,
-            credentials,
-            forcePathStyle: this.s3Option.forcePathStyle
+            credentials
         };
+        
+        // Add forcePathStyle only if explicitly set
+        if (this.s3Option.forcePathStyle !== undefined) {
+            baseConfig.forcePathStyle = this.s3Option.forcePathStyle;
+        }
         
         // Merge with additional client options
         const finalConfig = this.s3Option.clientOptions 
