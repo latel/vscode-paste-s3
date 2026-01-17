@@ -1,6 +1,6 @@
 name: Changeset Version
 
-'on':
+on:
   push:
     branches:
       - master

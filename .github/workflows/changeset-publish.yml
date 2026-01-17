@@ -1,6 +1,6 @@
 name: Changeset Release
 
-'on':
+on:
   push:
     branches:
       - master
@@ -29,7 +29,7 @@ jobs:
 
           # Get the previous version from package.json using git show
           if PREV_CONTENT=$(git show HEAD~1:package.json 2>/dev/null); then
-            PREVIOUS_VERSION=$(echo "$PREV_CONTENT" | node -p "JSON.parse(require('fs').readFileSync(0, 'utf-8')).version")
+            PREVIOUS_VERSION=$(echo "$PREV_CONTENT" | node -e "const data = require('fs').readFileSync(0, 'utf-8'); console.log(JSON.parse(data).version)")
             echo "Previous version: $PREVIOUS_VERSION"
           else
             echo "First commit, no previous version"
@@ -67,14 +67,14 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Run tests
+        run: xvfb-run -a yarn test
+
       - name: Run linter
         run: yarn run lint
 
       - name: Build extension
         run: yarn run package
-
-      - name: Run tests
-        run: xvfb-run -a yarn test
 
       - name: Package extension
         run: yarn vsce package
@@ -89,8 +89,6 @@ jobs:
       - name: Upload VSIX as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: >-
-            vscode-extension-vsix-v${{
-            needs.check-version.outputs.new-version }}
+          name: vscode-extension-vsix-v${{ needs.check-version.outputs.new-version }}
           path: '*.vsix'
           retention-days: 90
