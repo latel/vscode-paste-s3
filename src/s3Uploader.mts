@@ -29,9 +29,28 @@ export class S3Uploader implements ResourceUploader {
             prefix: emptyToUndefined(s3Section.get<string>('prefix')),
             publicUrlBase: emptyToUndefined(s3Section.get<string>('publicUrlBase')),
             omitExtension: s3Section.get<boolean>('omitExtension'),
-            skipExisting: s3Section.get<boolean>('skipExisting')
+            skipExisting: s3Section.get<boolean>('skipExisting'),
+            forcePathStyle: s3Section.get<boolean>('forcePathStyle'),
+            clientOptions: this.parseClientOptions(s3Section.get<string>('clientOptions'))
         };
         this.client = this.createClient();
+    }
+
+    private parseClientOptions(clientOptionsJson?: string): Record<string, any> | undefined {
+        if (!clientOptionsJson || _.isEmpty(clientOptionsJson)) {
+            return undefined;
+        }
+        try {
+            const parsed = JSON.parse(clientOptionsJson);
+            if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+                vscode.window.showWarningMessage('S3 client options must be a JSON object. Ignoring invalid configuration.');
+                return undefined;
+            }
+            return parsed;
+        } catch (e) {
+            vscode.window.showWarningMessage(`Failed to parse S3 client options: ${e}. Ignoring invalid configuration.`);
+            return undefined;
+        }
     }
 
     private createClient(): S3Client {
@@ -39,11 +58,25 @@ export class S3Uploader implements ResourceUploader {
             accessKeyId: this.s3Option.accessKeyId,
             secretAccessKey: this.s3Option.secretAccessKey
         } : undefined;
-        return new S3Client({
+        
+        // Base configuration
+        const baseConfig: any = {
             region: this.s3Option.region,
             endpoint: this.s3Option.endpoint,
             credentials
-        });
+        };
+        
+        // Add forcePathStyle if configured
+        if (this.s3Option.forcePathStyle !== undefined) {
+            baseConfig.forcePathStyle = this.s3Option.forcePathStyle;
+        }
+        
+        // Merge with additional client options
+        const finalConfig = this.s3Option.clientOptions 
+            ? { ...baseConfig, ...this.s3Option.clientOptions }
+            : baseConfig;
+        
+        return new S3Client(finalConfig);
     }
 
     private async checkIfObjectExists(key: string): Promise<boolean> {

@@ -100,6 +100,16 @@
           "default": true,
           "description": "Skip uploading if the file already exists in the destination. Useful when file names are generated based on the content hash."
         },
+        "paste-and-upload.s3.forcePathStyle": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to force path style URLs for S3 objects. Useful for S3-compatible storage that doesn't support virtual-hosted-style URLs."
+        },
+        "paste-and-upload.s3.clientOptions": {
+          "type": "string",
+          "default": "{}",
+          "markdownDescription": "Additional S3 client options in JSON format. These options will be merged into the S3Client configuration. See [AWS SDK S3Client documentation](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html) for available options."
+        },
         "paste-and-upload.workspace.path": {
           "type": "string",
           "default": "images",
