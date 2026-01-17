@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import _ from 'lodash';
-import { S3Client, DeleteObjectCommand, HeadObjectCommand, S3ServiceException } from '@aws-sdk/client-s3';
+import { S3Client, DeleteObjectCommand, HeadObjectCommand, S3ServiceException, S3ClientConfig } from '@aws-sdk/client-s3';
 import { Upload } from "@aws-sdk/lib-storage";
 import { filesize } from 'filesize';
 import { ResourceFile, ResourceUploader, ResourceUploadResult, S3Options } from './common.mjs';
@@ -8,6 +8,7 @@ import { ResourceFile, ResourceUploader, ResourceUploadResult, S3Options } from 
 export class S3Uploader implements ResourceUploader {
     private client: S3Client;
     private s3Option: S3Options;
+    private static readonly RESERVED_CLIENT_OPTIONS = ['credentials', 'region', 'endpoint'];
 
     constructor() {
         const s3Section = vscode.workspace.getConfiguration('paste-and-upload.s3');
@@ -29,9 +30,44 @@ export class S3Uploader implements ResourceUploader {
             prefix: emptyToUndefined(s3Section.get<string>('prefix')),
             publicUrlBase: emptyToUndefined(s3Section.get<string>('publicUrlBase')),
             omitExtension: s3Section.get<boolean>('omitExtension'),
-            skipExisting: s3Section.get<boolean>('skipExisting')
+            skipExisting: s3Section.get<boolean>('skipExisting'),
+            forcePathStyle: s3Section.get<boolean>('forcePathStyle'),
+            clientOptions: this.parseClientOptions(s3Section.get<string>('clientOptions'))
         };
         this.client = this.createClient();
+    }
+
+    private parseClientOptions(clientOptionsJson?: string): Record<string, any> | undefined {
+        // Handle undefined, null, empty string, or default empty object '{}'
+        if (!clientOptionsJson) {
+            return undefined;
+        }
+        
+        const trimmed = clientOptionsJson.trim();
+        if (trimmed === '' || trimmed === '{}') {
+            return undefined;
+        }
+        
+        try {
+            const parsed = JSON.parse(trimmed);
+            if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+                vscode.window.showWarningMessage('S3 client options must be a JSON object. Ignoring invalid configuration.');
+                return undefined;
+            }
+            
+            // Prevent overriding critical security settings
+            const hasReservedKeys = S3Uploader.RESERVED_CLIENT_OPTIONS.some(key => key in parsed);
+            if (hasReservedKeys) {
+                vscode.window.showWarningMessage(`S3 client options cannot override ${S3Uploader.RESERVED_CLIENT_OPTIONS.join(', ')}. Use the dedicated settings instead. Ignoring invalid configuration.`);
+                return undefined;
+            }
+            
+            return parsed;
+        } catch (e) {
+            const errorMessage = e instanceof Error ? e.message : 'Invalid JSON format';
+            vscode.window.showWarningMessage(`Failed to parse S3 client options: ${errorMessage}. Ignoring invalid configuration.`);
+            return undefined;
+        }
     }
 
     private createClient(): S3Client {
@@ -39,11 +75,25 @@ export class S3Uploader implements ResourceUploader {
             accessKeyId: this.s3Option.accessKeyId,
             secretAccessKey: this.s3Option.secretAccessKey
         } : undefined;
-        return new S3Client({
+        
+        // Base configuration
+        const baseConfig: S3ClientConfig = {
             region: this.s3Option.region,
             endpoint: this.s3Option.endpoint,
             credentials
-        });
+        };
+        
+        // Add forcePathStyle only if explicitly set
+        if (this.s3Option.forcePathStyle !== undefined) {
+            baseConfig.forcePathStyle = this.s3Option.forcePathStyle;
+        }
+        
+        // Merge with additional client options
+        const finalConfig = this.s3Option.clientOptions 
+            ? { ...baseConfig, ...this.s3Option.clientOptions }
+            : baseConfig;
+        
+        return new S3Client(finalConfig);
     }
 
     private async checkIfObjectExists(key: string): Promise<boolean> {
