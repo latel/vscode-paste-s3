@@ -83,9 +83,9 @@ export class S3Uploader implements ResourceUploader {
             credentials
         };
         
-        // Add forcePathStyle only if explicitly set
-        if (this.s3Option.forcePathStyle !== undefined) {
-            baseConfig.forcePathStyle = this.s3Option.forcePathStyle;
+        // Add forcePathStyle only when explicitly enabled
+        if (this.s3Option.forcePathStyle === true) {
+            baseConfig.forcePathStyle = true;
         }
         
         // Merge with additional client options

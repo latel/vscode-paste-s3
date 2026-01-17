@@ -108,7 +108,7 @@
         "paste-and-upload.s3.clientOptions": {
           "type": "string",
           "default": "{}",
-          "markdownDescription": "Additional S3 client options in JSON format. These options will be merged into the S3Client configuration. See [AWS SDK S3Client documentation](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html) for available options."
+          "markdownDescription": "Additional S3 client options in JSON format. These options will be merged into the S3Client configuration. See [AWS SDK S3Client documentation](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html) for available options.\n\nExample: `{\"maxAttempts\": 5}`\n\nNote: The reserved keys `credentials`, `region`, and `endpoint` cannot be overridden here for security reasons. Use the dedicated settings instead."
         },
         "paste-and-upload.workspace.path": {
           "type": "string",
