@@ -16,7 +16,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	const currentVersion = myExtension!.packageJSON.version;
 	const lastVersion = context.globalState.get<string>('paste-s3.version');
 	if (_.isEmpty(lastVersion)) {
-		const result = await vscode.window.showInformationMessage('Thank you for installing Paste and Upload! Please check the S3 settings:', 'Open settings');
+		const result = await vscode.window.showInformationMessage('Thank you for installing Paste S3! Please check the S3 settings:', 'Open settings');
 		if (result === 'Open settings') {
 			await vscode.commands.executeCommand('workbench.action.openSettings', 'paste-s3.s3');
 		}
