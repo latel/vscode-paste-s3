@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { nanoid } from 'nanoid';
 import MD5 from 'md5.js';
 
-import { FileNamingMethod, IncompleteResourceFile } from './common.mjs';
+import { FileNamingMethod, IncompleteResourceFile, ResourceFile } from './common.mjs';
 
 const extensionConfig = vscode.workspace.getConfiguration('paste-and-upload');
 
@@ -98,6 +98,65 @@ function inferFilename(url: string, headers: AxiosResponseHeaders): string {
 }
 
 const acceptHeader = "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
+
+/**
+ * Calculate MD5 hash for a file's data
+ * This is used for cache lookups to identify identical files
+ */
+export function calculateFileHash(file: ResourceFile): string {
+    return new MD5().update(file.data).digest('hex');
+}
+
+/**
+ * Upload cache manager to avoid re-uploading the same file
+ * 
+ * Design notes:
+ * - Uses timestamp-based LRU eviction when cache reaches MAX_CACHE_SIZE
+ * - Eviction triggers on write when at capacity (acceptable for 1000 entries)
+ * - Cache persists across VSCode sessions via globalState
+ * - No undo functionality for cached uploads (since no actual upload occurs)
+ */
+export class UploadCache {
+    private static readonly CACHE_KEY = 'paste-and-upload.uploadCache';
+    private static readonly MAX_CACHE_SIZE = 1000; // Maximum number of cached entries
+
+    constructor(private context: vscode.ExtensionContext) {}
+
+    /**
+     * Get cached URL for a file hash
+     */
+    getCachedUrl(hash: string): string | undefined {
+        const cache = this.context.globalState.get<Record<string, { url: string, timestamp: number }>>(UploadCache.CACHE_KEY, {});
+        const entry = cache[hash];
+        return entry?.url;
+    }
+
+    /**
+     * Store a file hash to URL mapping in cache
+     */
+    async setCachedUrl(hash: string, url: string): Promise<void> {
+        let cache = this.context.globalState.get<Record<string, { url: string, timestamp: number }>>(UploadCache.CACHE_KEY, {});
+        
+        // Simple size limit: if cache is too large, clear oldest entries by timestamp
+        if (Object.keys(cache).length >= UploadCache.MAX_CACHE_SIZE) {
+            const entries = Object.entries(cache);
+            // Sort by timestamp (oldest first) and remove oldest half
+            entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+            const half = Math.floor(entries.length / 2);
+            cache = Object.fromEntries(entries.slice(half));
+        }
+        
+        cache[hash] = { url, timestamp: Date.now() };
+        await this.context.globalState.update(UploadCache.CACHE_KEY, cache);
+    }
+
+    /**
+     * Clear all cached entries
+     */
+    async clearCache(): Promise<void> {
+        await this.context.globalState.update(UploadCache.CACHE_KEY, {});
+    }
+}
 
 export async function headContentType(url: string): Promise<string | undefined> {
     const response = await axios.head(url, {
