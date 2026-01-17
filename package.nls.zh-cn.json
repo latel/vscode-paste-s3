@@ -1,0 +1,66 @@
+{
+  "displayName": "粘贴并上传",
+  "description": "粘贴并上传图片到 S3 兼容存储。支持远程开发环境。",
+  
+  "command.testS3Connection.title": "测试 S3 连接",
+  "command.undoRecentUpload.title": "撤销最近的上传",
+  
+  "configuration.title": "粘贴并上传",
+  
+  "configuration.s3.region.description": "S3 兼容存储的区域。必须设置。",
+  "configuration.s3.endpoint.description": "S3 兼容存储的端点。如果您使用 AWS S3，请留空。",
+  "configuration.s3.accessKeyId.description": "S3 兼容存储的访问密钥 ID。如果您的存储桶不需要身份验证即可上传文件，则可以留空（不推荐）。",
+  "configuration.s3.secretAccessKey.description": "S3 兼容存储的密钥。如果您的存储桶不需要身份验证即可上传文件，则可以留空（不推荐）。",
+  "configuration.s3.bucket.description": "S3 兼容存储的存储桶。必须设置。",
+  "configuration.s3.prefix.description": "用于存储文件的路径前缀。例如，`images/` 将文件存储在 `images` 文件夹中。（斜杠将被保留）。",
+  "configuration.s3.publicUrlBase.description": "应添加到文件名之前以生成最终链接的基础 URL。例如，`https://example.com/imgs/` 将生成 URL `https://example.com/imgs/image.png`。路径前缀应手动添加到基础 URL（斜杠将被保留），或由反向代理处理。",
+  "configuration.s3.omitExtension.description": "在上传的文件名（键）中不包含文件扩展名。",
+  "configuration.s3.skipExisting.description": "如果目标位置已存在该文件，则跳过上传。当文件名基于内容哈希生成时很有用。",
+  "configuration.s3.forcePathStyle.description": "是否强制对 S3 对象使用路径样式 URL。适用于不支持虚拟托管样式 URL 的 S3 兼容存储。",
+  "configuration.s3.clientOptions.description": "JSON 格式的附加 S3 客户端选项。这些选项将合并到 S3Client 配置中。有关可用选项，请参阅 [AWS SDK S3Client 文档](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html)。",
+  
+  "configuration.workspace.path.description": "文件在本地保存的路径。该路径相对于工作区文件夹。",
+  "configuration.workspace.linkBase.description": "应添加到文件名之前以生成最终链接的基础路径。",
+  
+  "configuration.enabled.description": "启用扩展。",
+  "configuration.uploadDestination.description": "文件将上传到的目标位置。",
+  "configuration.uploadDestination.enum.s3": "将文件上传到 S3 兼容存储。",
+  "configuration.uploadDestination.enum.workspace": "将文件保存在本地工作区。",
+  
+  "configuration.fileSizeLimit.description": "文件大小限制（字节）。如果文件大小超过此限制，将提示用户确认上传。设置为 0 以禁用限制。",
+  "configuration.allowMultipleFiles.description": "允许一次上传多个文件。",
+  
+  "configuration.mimeTypeDetectionMethod.description": "当剪贴板未提供 MIME 类型时，如何检测文件的 MIME 类型。",
+  "configuration.mimeTypeDetectionMethod.enumItemLabel.content": "内容",
+  "configuration.mimeTypeDetectionMethod.enumItemLabel.extension": "扩展名",
+  "configuration.mimeTypeDetectionMethod.enumItemLabel.none": "无",
+  "configuration.mimeTypeDetectionMethod.enum.content": "基于内容中的魔术字节检测文件的 MIME 类型，失败时回退到文件扩展名",
+  "configuration.mimeTypeDetectionMethod.enum.extension": "基于文件扩展名检测文件的 MIME 类型",
+  "configuration.mimeTypeDetectionMethod.enum.none": "不检测文件的 MIME 类型，使用 `application/octet-stream` 作为默认 MIME 类型",
+  
+  "configuration.keepOriginalFilename.description": "上传文件时保留原始文件名。如果禁用，将生成随机名称。像 `image.png` 这样的默认文件名将始终被重命名。",
+  
+  "configuration.fileNamingMethod.description": "当 `#paste-and-upload.keepOriginalFilename#` 被禁用时，或剪贴板未提供文件名时，用于生成文件名的方法。",
+  "configuration.fileNamingMethod.enumItemLabel.md5": "MD5 哈希",
+  "configuration.fileNamingMethod.enumItemLabel.md5Short": "短 MD5 哈希",
+  "configuration.fileNamingMethod.enumItemLabel.uuid": "UUID",
+  "configuration.fileNamingMethod.enumItemLabel.nanoid": "Nano ID",
+  "configuration.fileNamingMethod.enumItemLabel.unixTimestamp": "Unix 时间戳",
+  "configuration.fileNamingMethod.enumItemLabel.readableTimestamp": "可读时间戳",
+  "configuration.fileNamingMethod.enumItemLabel.prompt": "提示",
+  "configuration.fileNamingMethod.enum.md5": "文件内容的 MD5 哈希。",
+  "configuration.fileNamingMethod.enum.md5Short": "文件内容的短（8 位）MD5 哈希。",
+  "configuration.fileNamingMethod.enum.uuid": "随机 UUIDv4。",
+  "configuration.fileNamingMethod.enum.nanoid": "随机 Nano ID。",
+  "configuration.fileNamingMethod.enum.unixTimestamp": "毫秒级 Unix 时间戳。",
+  "configuration.fileNamingMethod.enum.readableTimestamp": "人类可读的时间戳。",
+  "configuration.fileNamingMethod.enum.prompt": "提示用户输入名称。",
+  
+  "configuration.defaultSnippet.description": "上传后将插入到文档中的默认代码片段。可以使用以下变量：\n\n- `${url}`\n- `${filename}`\n- `${filenameWithoutExtension}`\n- `${extension}`\n- `${mimeType}`",
+  "configuration.imageSnippet.description": "上传后将插入到文档中的默认代码片段。可以使用以下变量：\n\n- `${url}`\n- `${filename}`\n- `${filenameWithoutExtension}`\n- `${extension}`\n- `${mimeType}`",
+  
+  "configuration.undoLimit.description": "可以执行的撤销上传的最大数量。设置为 0 以禁用撤销功能。",
+  "configuration.mimeTypeFilter.description": "匹配应上传的 MIME 类型的正则表达式，例如，`image/.*` 将仅上传图像。留空以上传任何 MIME 类型。请注意，文本文件的 MIME 类型无法可靠检测，如果检测失败，将被视为 `application/octet-stream`。",
+  "configuration.ignoreWorkspaceFiles.description": "上传文件时忽略工作区中已存在的文件。其他扩展（如内置的 Markdown 扩展）可能会处理这些文件。",
+  "configuration.retrieveOriginalImage.description": "粘贴时是否尝试从剪贴板下载原始图像。这对于从 Microsoft Edge 等浏览器粘贴动画图像很有用，这些浏览器仅在剪贴板中提供静态图像。"
+}

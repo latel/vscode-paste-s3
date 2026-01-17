@@ -6,8 +6,8 @@
     "vscode": "^1.97.0"
   },
   "license": "MIT",
-  "displayName": "Paste and Upload",
-  "description": "Paste and upload image to S3-Compatible storage. Works in remote development environments.",
+  "displayName": "%displayName%",
+  "description": "%description%",
   "categories": [
     "Other"
   ],
@@ -45,86 +45,86 @@
     "commands": [
       {
         "command": "paste-and-upload.testS3Connection",
-        "title": "Test S3 Connection"
+        "title": "%command.testS3Connection.title%"
       },
       {
         "command": "paste-and-upload.undoRecentUpload",
-        "title": "Undo Recent Upload"
+        "title": "%command.undoRecentUpload.title%"
       }
     ],
     "configuration": {
-      "title": "Paste and Upload",
+      "title": "%configuration.title%",
       "properties": {
         "paste-and-upload.s3.region": {
           "type": "string",
           "default": "",
-          "description": "The region of the S3-compatible storage. Must be set."
+          "description": "%configuration.s3.region.description%"
         },
         "paste-and-upload.s3.endpoint": {
           "type": "string",
           "default": "",
-          "description": "The endpoint of the S3-compatible storage. Leave empty if you are using AWS S3."
+          "description": "%configuration.s3.endpoint.description%"
         },
         "paste-and-upload.s3.accessKeyId": {
           "type": "string",
           "default": "",
-          "description": "The access key ID of the S3-compatible storage. Can be left empty if your bucket does not require authentication to upload files (Not recommended)."
+          "description": "%configuration.s3.accessKeyId.description%"
         },
         "paste-and-upload.s3.secretAccessKey": {
           "type": "string",
           "default": "",
-          "description": "The secret access key of the S3-compatible storage. Can be left empty if your bucket does not require authentication to upload files (Not recommended)."
+          "description": "%configuration.s3.secretAccessKey.description%"
         },
         "paste-and-upload.s3.bucket": {
           "type": "string",
           "default": "",
-          "description": "The bucket of the S3-compatible storage. Must be set."
+          "description": "%configuration.s3.bucket.description%"
         },
         "paste-and-upload.s3.prefix": {
           "type": "string",
           "default": "",
-          "markdownDescription": "The path prefix that will be used to store the files. For example, `images/` will store the files in the `images` folder. (Slashes will be preserved)."
+          "markdownDescription": "%configuration.s3.prefix.description%"
         },
         "paste-and-upload.s3.publicUrlBase": {
           "type": "string",
           "default": "",
-          "markdownDescription": "The base that should be prepended to the file name to generate the final link. For example, `https://example.com/imgs/` will generate the URL `https://example.com/imgs/image.png`. The path prefix should be manually added to the base URL (slashes will be preserved), or handled by your reverse proxy."
+          "markdownDescription": "%configuration.s3.publicUrlBase.description%"
         },
         "paste-and-upload.s3.omitExtension": {
           "type": "boolean",
           "default": false,
-          "description": "Do not include the file extension in the uploaded file name (key)."
+          "description": "%configuration.s3.omitExtension.description%"
         },
         "paste-and-upload.s3.skipExisting": {
           "type": "boolean",
           "default": true,
-          "description": "Skip uploading if the file already exists in the destination. Useful when file names are generated based on the content hash."
+          "description": "%configuration.s3.skipExisting.description%"
         },
         "paste-and-upload.s3.forcePathStyle": {
           "type": "boolean",
           "default": false,
-          "description": "Whether to force path style URLs for S3 objects. Useful for S3-compatible storage that doesn't support virtual-hosted-style URLs."
+          "description": "%configuration.s3.forcePathStyle.description%"
         },
         "paste-and-upload.s3.clientOptions": {
           "type": "string",
           "default": "{}",
-          "markdownDescription": "Additional S3 client options in JSON format. These options will be merged into the S3Client configuration. See [AWS SDK S3Client documentation](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html) for available options."
+          "markdownDescription": "%configuration.s3.clientOptions.description%"
         },
         "paste-and-upload.workspace.path": {
           "type": "string",
           "default": "images",
-          "description": "The path where the files will be saved locally. The path is relative to the workspace folder."
+          "description": "%configuration.workspace.path.description%"
         },
         "paste-and-upload.workspace.linkBase": {
           "type": "string",
           "default": "images/",
-          "description": "The base that should be prepended to the file name to generate the final link."
+          "description": "%configuration.workspace.linkBase.description%"
         },
         "paste-and-upload.enabled": {
           "type": "boolean",
           "default": true,
           "scope": "language-overridable",
-          "description": "Enable the extension.",
+          "description": "%configuration.enabled.description%",
           "order": 0
         },
         "paste-and-upload.uploadDestination": {
@@ -135,18 +135,18 @@
             "workspace"
           ],
           "enumDescriptions": [
-            "Upload the files to the S3-compatible storage.",
-            "Save the files locally in the workspace."
+            "%configuration.uploadDestination.enum.s3%",
+            "%configuration.uploadDestination.enum.workspace%"
           ],
           "scope": "language-overridable",
-          "description": "The destination where the files will be uploaded.",
+          "description": "%configuration.uploadDestination.description%",
           "order": 1
         },
         "paste-and-upload.fileSizeLimit": {
           "type": "integer",
           "default": 10000000,
           "scope": "language-overridable",
-          "description": "File size limit in bytes. Users will be prompted to confirm the upload if the file size exceeds this limit. Set to 0 to disable the limit."
+          "description": "%configuration.fileSizeLimit.description%"
         },
         "paste-and-upload.allowMultipleFiles": {
           "type": "string",
@@ -157,7 +157,7 @@
             "deny"
           ],
           "scope": "language-overridable",
-          "description": "Allow multiple files to be uploaded at once."
+          "description": "%configuration.allowMultipleFiles.description%"
         },
         "paste-and-upload.mimeTypeDetectionMethod": {
           "type": "string",
@@ -168,23 +168,23 @@
             "none"
           ],
           "enumItemLabels": [
-            "Content",
-            "Extension",
-            "None"
+            "%configuration.mimeTypeDetectionMethod.enumItemLabel.content%",
+            "%configuration.mimeTypeDetectionMethod.enumItemLabel.extension%",
+            "%configuration.mimeTypeDetectionMethod.enumItemLabel.none%"
           ],
           "markdownEnumDescriptions": [
-            "Detect the MIME type of the files based on magic bytes in the content, and fallbacks to file extension when failed",
-            "Detect the MIME type of the files based on the file extension",
-            "Do not detect the MIME type of the files, use `application/octet-stream` as the default MIME type"
+            "%configuration.mimeTypeDetectionMethod.enum.content%",
+            "%configuration.mimeTypeDetectionMethod.enum.extension%",
+            "%configuration.mimeTypeDetectionMethod.enum.none%"
           ],
           "scope": "language-overridable",
-          "description": "How to detect the MIME type of the files when the clipboard does not provide it."
+          "description": "%configuration.mimeTypeDetectionMethod.description%"
         },
         "paste-and-upload.keepOriginalFilename": {
           "type": "boolean",
           "default": false,
           "scope": "language-overridable",
-          "markdownDescription": "Keep the original file name when uploading files. If disabled, a random name will be generated. Default file names like `image.png` will always be renamed."
+          "markdownDescription": "%configuration.keepOriginalFilename.description%"
         },
         "paste-and-upload.fileNamingMethod": {
           "type": "string",
@@ -199,62 +199,62 @@
             "prompt"
           ],
           "enumItemLabels": [
-            "MD5 Hash",
-            "Short MD5 Hash",
-            "UUID",
-            "Nano ID",
-            "Unix Timestamp",
-            "Readable Timestamp",
-            "Prompt"
+            "%configuration.fileNamingMethod.enumItemLabel.md5%",
+            "%configuration.fileNamingMethod.enumItemLabel.md5Short%",
+            "%configuration.fileNamingMethod.enumItemLabel.uuid%",
+            "%configuration.fileNamingMethod.enumItemLabel.nanoid%",
+            "%configuration.fileNamingMethod.enumItemLabel.unixTimestamp%",
+            "%configuration.fileNamingMethod.enumItemLabel.readableTimestamp%",
+            "%configuration.fileNamingMethod.enumItemLabel.prompt%"
           ],
           "enumDescriptions": [
-            "MD5 hash of the file content.",
-            "Short (8 Digits) MD5 hash of the file content.",
-            "Random UUIDv4.",
-            "Random Nano ID.",
-            "Unix timestamp in milliseconds.",
-            "Human-readable timestamp.",
-            "Prompt the user for a name."
+            "%configuration.fileNamingMethod.enum.md5%",
+            "%configuration.fileNamingMethod.enum.md5Short%",
+            "%configuration.fileNamingMethod.enum.uuid%",
+            "%configuration.fileNamingMethod.enum.nanoid%",
+            "%configuration.fileNamingMethod.enum.unixTimestamp%",
+            "%configuration.fileNamingMethod.enum.readableTimestamp%",
+            "%configuration.fileNamingMethod.enum.prompt%"
           ],
           "scope": "language-overridable",
-          "markdownDescription": "The method used to generate the file name when `#paste-and-upload.keepOriginalFilename#` is disabled, or when the file name is not provided by the clipboard.",
+          "markdownDescription": "%configuration.fileNamingMethod.description%",
           "order": 2
         },
         "paste-and-upload.defaultSnippet": {
           "type": "string",
           "default": "${url}",
           "scope": "language-overridable",
-          "markdownDescription": "The default snippet that will be inserted in the document after uploading. The following variables can be used: \n\n- `${url}`\n- `${filename}`\n- `${filenameWithoutExtension}`\n- `${extension}`\n- `${mimeType}`",
+          "markdownDescription": "%configuration.defaultSnippet.description%",
           "order": 3
         },
         "paste-and-upload.imageSnippet": {
           "type": "string",
           "default": "${url}",
           "scope": "language-overridable",
-          "markdownDescription": "The default snippet that will be inserted in the document after uploading. The following variables can be used: \n\n- `${url}`\n- `${filename}`\n- `${filenameWithoutExtension}`\n- `${extension}`\n- `${mimeType}`",
+          "markdownDescription": "%configuration.imageSnippet.description%",
           "order": 4
         },
         "paste-and-upload.undoLimit": {
           "type": "integer",
           "default": 10,
-          "markdownDescription": "The maximum number of undo uploads that can be performed. Set to 0 to disable the undo feature."
+          "markdownDescription": "%configuration.undoLimit.description%"
         },
         "paste-and-upload.mimeTypeFilter": {
           "type": "string",
           "default": "",
-          "markdownDescription": "A regular expression that matches the MIME types that should be uploaded, for example, `image/.*` will only upload images. Leave empty to upload any MIME type. Note that the MIME type of text files is not realiably detected, and will be treated as `application/octet-stream` if the detection fails.",
+          "markdownDescription": "%configuration.mimeTypeFilter.description%",
           "order": 5
         },
         "paste-and-upload.ignoreWorkspaceFiles": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "Ignore files that are already in the workspace when uploading files. Other extensions like the built-in Markdown extension may handle these files.",
+          "markdownDescription": "%configuration.ignoreWorkspaceFiles.description%",
           "order": 6
         },
         "paste-and-upload.retrieveOriginalImage": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "Whether to try to download the original image from the clipboard when pasting. This is useful for pasting animated images from browsers like Microsoft Edge, which only provide a static image in the clipboard.",
+          "markdownDescription": "%configuration.retrieveOriginalImage.description%",
           "order": 7
         }
       }
