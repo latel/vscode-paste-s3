@@ -31,7 +31,6 @@ jobs:
 
       - name: Run tests
         run: xvfb-run -a yarn test
-        if: runner.os == 'Linux'
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

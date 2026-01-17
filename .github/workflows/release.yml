@@ -41,16 +41,10 @@ jobs:
 
       - name: Publish to VSCode Marketplace
         run: yarn vsce publish -p ${{ secrets.VSCE_TOKEN }}
-        env:
-          VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
 
       - name: Publish to Open VSX Registry
-        run: |
-          yarn global add ovsx
-          ovsx publish -p ${{ secrets.OVSX_TOKEN }} *.vsix
+        run: npx ovsx publish -p ${{ secrets.OVSX_TOKEN }} *.vsix
         continue-on-error: true
-        env:
-          OVSX_TOKEN: ${{ secrets.OVSX_TOKEN }}
 
       - name: Upload VSIX as artifact
         uses: actions/upload-artifact@v4
