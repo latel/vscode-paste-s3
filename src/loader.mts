@@ -11,7 +11,7 @@ import { ResourceFileLoaderOptions, MimeTypeDetectionMethod, FileNamingMethod, I
 export class ResourceFileLoader {
     private readonly options: ResourceFileLoaderOptions;
     constructor(public readonly languageId: string) {
-        const languageOptions = vscode.workspace.getConfiguration('paste-and-upload', { languageId });
+        const languageOptions = vscode.workspace.getConfiguration('paste-s3', { languageId });
         this.options = {
             enabled: languageOptions.get<boolean>('enabled')!,
             uploadDestination: languageOptions.get<UploadDestination>('uploadDestination')!,

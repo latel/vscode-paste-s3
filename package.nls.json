@@ -40,7 +40,7 @@
   
   "configuration.keepOriginalFilename.description": "Keep the original file name when uploading files. If disabled, a random name will be generated. Default file names like `image.png` will always be renamed.",
   
-  "configuration.fileNamingMethod.description": "The method used to generate the file name when `#paste-and-upload.keepOriginalFilename#` is disabled, or when the file name is not provided by the clipboard.",
+  "configuration.fileNamingMethod.description": "The method used to generate the file name when `#paste-s3.keepOriginalFilename#` is disabled, or when the file name is not provided by the clipboard.",
   "configuration.fileNamingMethod.enumItemLabel.md5": "MD5 Hash",
   "configuration.fileNamingMethod.enumItemLabel.md5Short": "Short MD5 Hash",
   "configuration.fileNamingMethod.enumItemLabel.uuid": "UUID",

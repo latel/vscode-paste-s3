@@ -14,7 +14,7 @@ export class S3Uploader implements ResourceUploader {
 
     constructor(context: vscode.ExtensionContext) {
         this.cache = new UploadCache(context);
-        const s3Section = vscode.workspace.getConfiguration('paste-and-upload.s3');
+        const s3Section = vscode.workspace.getConfiguration('paste-s3.s3');
         const region = s3Section.get<string>('region');
         if (_.isEmpty(region)) {
             throw new Error('Region is required');
@@ -167,8 +167,8 @@ export class S3Uploader implements ResourceUploader {
 
     public async testConnection(): Promise<void> {
         const payload = new Uint8Array(100 * 1000);
-        const prefix = vscode.workspace.getConfiguration('paste-and-upload.s3').get<string>('prefix') ?? '';
-        const key = `${prefix}paste-and-upload-test.txt`;
+        const prefix = vscode.workspace.getConfiguration('paste-s3.s3').get<string>('prefix') ?? '';
+        const key = `${prefix}paste-s3-test.txt`;
         try {
             await this.uploadBuffer(payload, key);
         } catch (e) {

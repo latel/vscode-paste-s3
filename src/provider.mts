@@ -34,7 +34,7 @@ export class ResourcePasteOrDropProvider implements vscode.DocumentPasteEditProv
     loaders: { [languageId: string]: ResourceFileLoader } = {};
     uploaders: { [key: string]: ResourceUploader } = {};
     undoHistory: [string, () => Thenable<void>][] = [];
-    undoLimit = vscode.workspace.getConfiguration('paste-and-upload').get<number>('undoLimit') ?? 10;
+    undoLimit = vscode.workspace.getConfiguration('paste-s3').get<number>('undoLimit') ?? 10;
     
     constructor(private context: vscode.ExtensionContext) {
         console.log('ResourcePasteOrDropProvider created');
@@ -167,10 +167,10 @@ export class ResourcePasteOrDropProvider implements vscode.DocumentPasteEditProv
                 providedPasteEditKinds: [resourceUploadKind],
                 pasteMimeTypes: ['files', 'text/uri-list', 'image/*']
             }),
-            vscode.commands.registerCommand('paste-and-upload.undoRecentUpload', () => this.showUndoMenu()),
+            vscode.commands.registerCommand('paste-s3.undoRecentUpload', () => this.showUndoMenu()),
             vscode.workspace.onDidChangeConfiguration(e => {
-                if (e.affectsConfiguration('paste-and-upload')) {
-                    this.undoLimit = vscode.workspace.getConfiguration('paste-and-upload').get<number>('undoLimit') ?? 10;
+                if (e.affectsConfiguration('paste-s3')) {
+                    this.undoLimit = vscode.workspace.getConfiguration('paste-s3').get<number>('undoLimit') ?? 10;
                     while (this.undoHistory.length > this.undoLimit) {
                         this.undoHistory.shift();
                     }
