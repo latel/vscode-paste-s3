@@ -7,6 +7,56 @@ import MD5 from 'md5.js';
 
 import { FileNamingMethod, IncompleteResourceFile, ResourceFile } from './common.mjs';
 
+/**
+ * Hash provider that prioritizes system crypto functions for best performance
+ * Falls back to md5.js if system crypto is unavailable
+ */
+let systemCrypto: typeof import('crypto') | null = null;
+let selectedHashAlgorithm: string | null = null;
+
+// Try to load system crypto and select the best available hash algorithm
+try {
+    systemCrypto = require('crypto');
+    if (systemCrypto) {
+        const availableHashes = systemCrypto.getHashes();
+        
+        // Priority order: blake2b512 > blake2s256 > md5 (by performance)
+        // For file deduplication, we don't need cryptographic security
+        const hashPriority = ['blake2b512', 'blake2s256', 'md5'];
+        
+        for (const algo of hashPriority) {
+            if (availableHashes.includes(algo)) {
+                selectedHashAlgorithm = algo;
+                console.log(`[Paste and Upload] Using system crypto hash: ${algo}`);
+                break;
+            }
+        }
+        
+        if (!selectedHashAlgorithm) {
+            // Fallback to any available hash if our preferred ones aren't available
+            selectedHashAlgorithm = 'sha256'; // sha256 should be universally available
+            console.log(`[Paste and Upload] Using fallback system crypto hash: ${selectedHashAlgorithm}`);
+        }
+    }
+} catch (error) {
+    console.log('[Paste and Upload] System crypto not available, using md5.js fallback');
+}
+
+/**
+ * Calculate hash for data using the best available method
+ * @param data Buffer to hash
+ * @returns Hex-encoded hash string
+ */
+function calculateHash(data: Uint8Array): string {
+    if (systemCrypto && selectedHashAlgorithm) {
+        // Use system crypto for better performance
+        return systemCrypto.createHash(selectedHashAlgorithm).update(data).digest('hex');
+    } else {
+        // Fallback to md5.js
+        return new MD5().update(data).digest('hex');
+    }
+}
+
 const extensionConfig = vscode.workspace.getConfiguration('paste-and-upload');
 
 export async function inspectDataTransfer(dataTransfer: vscode.DataTransfer) {
@@ -45,7 +95,7 @@ export async function generateFileName(method: FileNamingMethod, file: Incomplet
     switch (method) {
         case 'md5':
         case 'md5Short':
-            const hash = new MD5().update(file.data).digest('hex');
+            const hash = calculateHash(file.data);
             return method === 'md5' ? hash : hash.substring(0, 8);
         case 'uuid':
             return uuidv4();
@@ -100,11 +150,12 @@ function inferFilename(url: string, headers: AxiosResponseHeaders): string {
 const acceptHeader = "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
 
 /**
- * Calculate MD5 hash for a file's data
+ * Calculate hash for a file's data
  * This is used for cache lookups to identify identical files
+ * Uses the best available hash algorithm (system crypto > md5.js fallback)
  */
 export function calculateFileHash(file: ResourceFile): string {
-    return new MD5().update(file.data).digest('hex');
+    return calculateHash(file.data);
 }
 
 /**
