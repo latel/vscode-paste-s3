@@ -8,6 +8,7 @@ import { ResourceFile, ResourceUploader, ResourceUploadResult, S3Options } from 
 export class S3Uploader implements ResourceUploader {
     private client: S3Client;
     private s3Option: S3Options;
+    private static readonly RESERVED_CLIENT_OPTIONS = ['credentials', 'region', 'endpoint'];
 
     constructor() {
         const s3Section = vscode.workspace.getConfiguration('paste-and-upload.s3');
@@ -37,9 +38,16 @@ export class S3Uploader implements ResourceUploader {
     }
 
     private parseClientOptions(clientOptionsJson?: string): Record<string, any> | undefined {
-        if (!clientOptionsJson || _.isEmpty(clientOptionsJson)) {
+        // Skip if empty or undefined, but allow the default empty object '{}'
+        if (!clientOptionsJson) {
             return undefined;
         }
+        
+        const trimmed = clientOptionsJson.trim();
+        if (trimmed === '' || trimmed === '{}') {
+            return undefined;
+        }
+        
         try {
             const parsed = JSON.parse(clientOptionsJson);
             if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
@@ -48,10 +56,9 @@ export class S3Uploader implements ResourceUploader {
             }
             
             // Prevent overriding critical security settings
-            const reservedKeys = ['credentials', 'region', 'endpoint'];
-            const hasReservedKeys = reservedKeys.some(key => key in parsed);
+            const hasReservedKeys = S3Uploader.RESERVED_CLIENT_OPTIONS.some(key => key in parsed);
             if (hasReservedKeys) {
-                vscode.window.showWarningMessage(`S3 client options cannot override ${reservedKeys.join(', ')}. Use the dedicated settings instead. Ignoring invalid configuration.`);
+                vscode.window.showWarningMessage(`S3 client options cannot override ${S3Uploader.RESERVED_CLIENT_OPTIONS.join(', ')}. Use the dedicated settings instead. Ignoring invalid configuration.`);
                 return undefined;
             }
             
