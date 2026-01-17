@@ -6,7 +6,7 @@ This project uses [Changesets](https://github.com/changesets/changesets) to mana
 
 1. **Adding Changes**: When you make changes that should be included in a release, create a changeset:
    ```bash
-   yarn changeset
+   pnpm changeset
    ```
    This will prompt you to describe the changes and select the type of version bump (patch, minor, or major).
 
@@ -26,9 +26,9 @@ You can also manually trigger a release by merging the "Version Packages" PR or 
 
 ## Commands
 
-- `yarn changeset` - Create a new changeset
-- `yarn changeset:version` - Apply changesets and bump version (done automatically by CI)
-- `yarn changeset:publish` - Publish packages (done automatically by CI)
+- `pnpm changeset` - Create a new changeset
+- `pnpm changeset:version` - Apply changesets and bump version (done automatically by CI)
+- `pnpm changeset:publish` - Publish packages (done automatically by CI)
 
 ## Workflow Files
 
