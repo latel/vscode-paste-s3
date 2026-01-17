@@ -37,18 +37,28 @@ export class S3Uploader implements ResourceUploader {
     }
 
     private parseClientOptions(clientOptionsJson?: string): Record<string, any> | undefined {
-        if (_.isEmpty(clientOptionsJson)) {
+        if (!clientOptionsJson || _.isEmpty(clientOptionsJson)) {
             return undefined;
         }
         try {
-            const parsed = JSON.parse(clientOptionsJson!);
+            const parsed = JSON.parse(clientOptionsJson);
             if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
                 vscode.window.showWarningMessage('S3 client options must be a JSON object. Ignoring invalid configuration.');
                 return undefined;
             }
+            
+            // Prevent overriding critical security settings
+            const reservedKeys = ['credentials', 'region', 'endpoint'];
+            const hasReservedKeys = reservedKeys.some(key => key in parsed);
+            if (hasReservedKeys) {
+                vscode.window.showWarningMessage(`S3 client options cannot override ${reservedKeys.join(', ')}. Use the dedicated settings instead. Ignoring invalid configuration.`);
+                return undefined;
+            }
+            
             return parsed;
         } catch (e) {
-            vscode.window.showWarningMessage(`Failed to parse S3 client options: ${e}. Ignoring invalid configuration.`);
+            const errorMessage = e instanceof Error ? e.message : 'Invalid JSON format';
+            vscode.window.showWarningMessage(`Failed to parse S3 client options: ${errorMessage}. Ignoring invalid configuration.`);
             return undefined;
         }
     }
