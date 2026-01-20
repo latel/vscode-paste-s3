@@ -1,7 +1,7 @@
 > This is a Fork of https://github.com/Duanyll/paste-and-upload
 
 <p align="center">
-  <img src="./assets/icon.png?raw=true" />
+  <img src="./assets/icon.png" />
 </p>
 
 # VSCode Paste S3

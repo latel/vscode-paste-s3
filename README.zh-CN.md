@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/icon.png?raw=true" />
+  <img src="./assets/icon.png" />
 </p>
 
 # 粘贴并上传
