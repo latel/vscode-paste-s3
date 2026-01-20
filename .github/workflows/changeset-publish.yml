@@ -52,7 +52,7 @@ jobs:
     if: needs.check-version.outputs.version-changed == 'true'
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout code
@@ -97,3 +97,11 @@ jobs:
           name: vscode-extension-vsix-v${{ needs.check-version.outputs.new-version }}
           path: '*.vsix'
           retention-days: 90
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.check-version.outputs.new-version }}
+          name: v${{ needs.check-version.outputs.new-version }}
+          generate_release_notes: true
+          files: '*.vsix'
