@@ -8,7 +8,7 @@
 
 [![](https://img.shields.io/badge/Visual_Studio_Marketplace-Download-blue)](https://marketplace.visualstudio.com/items?itemName=duanyll.paste-s3) [![](https://img.shields.io/badge/Open_VSX-Download-blue)](https://open-vsx.org/extension/duanyll/paste-s3) [![](https://img.shields.io/badge/GitHub-Source-blue)](https://github.com/latel/vscode-paste-s3)
 
-この拡張機能を使用すると、クリップボード（またはファイル）から画像（およびその他のファイルシステム）を直接貼り付け、S3（またはS3互換エンドポイント）バケットにアップロードして、その画像（ファイル）へのリンクを挿入できます。`DocumentPaste` および `DocumentDrop` API を使用しており、リモートワークスペースでも動作します。この拡張機能は、S3互換ストレージの `forcePathStyle` もサポートしています。
+この拡張機能を使用すると、クリップボード（またはファイルシステム）から直接画像（またはファイル）を貼り付け、S3（またはS3互換エンドポイント）バケットにアップロードし、その画像（またはファイル）へのリンクを挿入できます。`DocumentPaste` および `DocumentDrop` API を利用しており、リモートワークスペースでも動作します。また、MinIOのようなS3互換ストレージへのパススタイルアクセスのための `forcePathStyle` もサポートしています。
 
 ## Features
 

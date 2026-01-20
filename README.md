@@ -10,7 +10,7 @@
 
 [中文文档](README.zh-CN.md) | [日本語ドキュメント](README.ja.md) | [한국어 문서](README.ko.md)
 
-This extension allows you to paste images (and other file system) directly from your clipboard (or from file), upload them to a S3 (or S3 compatible endpoint) bucket, then insert a link pointing to the image(file). It utilizes the `DocumentPaste` and `DocumentDrop` API and works on remote workspaces. This extension also supports `forcePathStyle` for S3-compatible storage.
+This extension allows you to paste images (or files) directly from your clipboard (or from filesystem), upload them to a S3 (or S3 compatible endpoint) bucket, then insert link(s) pointing to the images(or files). It utilizes the `DocumentPaste` and `DocumentDrop` API and works on remote workspaces. This extension also supports `forcePathStyle` for path style access to S3-compatible storage like MinIO.
 
 ## Features
 

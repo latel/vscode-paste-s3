@@ -6,7 +6,7 @@
 
 [![](https://img.shields.io/badge/Visual_Studio_Marketplace-Download-blue)](https://marketplace.visualstudio.com/items?itemName=duanyll.paste-s3) [![](https://img.shields.io/badge/Open_VSX-Download-blue)](https://open-vsx.org/extension/duanyll/paste-s3) [![](https://img.shields.io/badge/GitHub-Source-blue)](https://github.com/latel/vscode-paste-s3)
 
-此扩展允许您直接从剪贴板（或通过文件）粘贴图像（及其他文件系统文件），将其上传到 S3（或 S3 兼容端点）存储桶，然后插入指向该图像（文件）的链接。它利用 `DocumentPaste` 和 `DocumentDrop` API，并支持在远程工作区中使用。此扩展还支持 S3 兼容存储的 `forcePathStyle`。
+此扩展允许您直接从剪贴板（或文件系统）粘贴图片（或文件），将其上传到 S3（或 S3 兼容端点）存储桶，然后插入指向该图片（或文件）的链接。它利用 `DocumentPaste` 和 `DocumentDrop` API，并支持在远程工作区中使用。此扩展还支持 `forcePathStyle`，以便通过路径样式访问像 MinIO 这样的 S3 兼容存储。
 
 ## 功能特性
 
