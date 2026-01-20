@@ -1,11 +1,12 @@
 {
-  "displayName": "粘贴并上传",
+  "displayName": "Paste S3",
   "description": "粘贴并上传图片到 S3 兼容存储。支持远程开发环境。",
   
   "command.testS3Connection.title": "测试 S3 连接",
   "command.undoRecentUpload.title": "撤销最近的上传",
+  "command.clearCache.title": "清除上传缓存",
   
-  "configuration.title": "粘贴并上传",
+  "configuration.title": "Paste S3",
   
   "configuration.s3.region.description": "S3 兼容存储的区域。必须设置。",
   "configuration.s3.endpoint.description": "S3 兼容存储的端点。如果您使用 AWS S3，请留空。",
@@ -40,7 +41,7 @@
   
   "configuration.keepOriginalFilename.description": "上传文件时保留原始文件名。如果禁用，将生成随机名称。像 `image.png` 这样的默认文件名将始终被重命名。",
   
-  "configuration.fileNamingMethod.description": "当 `#paste-s3.keepOriginalFilename#` 被禁用时，或剪贴板未提供文件名时，用于生成文件名的方法。",
+  "configuration.fileNamingMethod.description": "当禁用 \"Paste S3: Keep Original Filename\" 或剪贴板未提供文件名时，用于生成文件名的方法。",
   "configuration.fileNamingMethod.enumItemLabel.md5": "MD5 哈希",
   "configuration.fileNamingMethod.enumItemLabel.md5Short": "短 MD5 哈希",
   "configuration.fileNamingMethod.enumItemLabel.uuid": "UUID",

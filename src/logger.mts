@@ -20,7 +20,7 @@ export class Logger implements vscode.Disposable {
     private logLevel: LogLevel = LogLevel.INFO;
 
     private constructor() {
-        this.outputChannel = vscode.window.createOutputChannel('Paste and Upload');
+        this.outputChannel = vscode.window.createOutputChannel('Paste S3');
     }
 
     /**

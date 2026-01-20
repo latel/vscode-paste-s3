@@ -91,7 +91,7 @@ if (!selectedHashCommand) {
  * 
  * Note: This function uses synchronous operations for simplicity and consistency.
  * For large files, this will block the event loop during hash calculation.
- * This is acceptable for the paste-and-upload use case where files are typically
+ * This is acceptable for the paste-s3 use case where files are typically
  * small to medium sized (images, etc.), and the operation is user-initiated.
  * 
  * @param data Buffer to hash
@@ -143,7 +143,7 @@ function calculateHash(data: Uint8Array): string {
     }
 }
 
-const extensionConfig = vscode.workspace.getConfiguration('paste-s3');
+const extensionConfig = vscode.workspace.getConfiguration('pasteS3');
 
 export async function inspectDataTransfer(dataTransfer: vscode.DataTransfer) {
     const logger = getLogger();
@@ -256,17 +256,19 @@ export function calculateFileHash(file: ResourceFile): string {
  * - No undo functionality for cached uploads (since no actual upload occurs)
  */
 export class UploadCache {
-    private static readonly CACHE_KEY = 'paste-s3.uploadCache';
+    // Use in-memory storage instead of globalState
+    private static cache: Record<string, { url: string, timestamp: number }> = {};
     private static readonly MAX_CACHE_SIZE = 1000; // Maximum number of cached entries
 
-    constructor(private context: vscode.ExtensionContext) {}
+    constructor(context?: vscode.ExtensionContext) {
+        // Context is no longer needed for in-memory cache
+    }
 
     /**
      * Get cached URL for a file hash
      */
     getCachedUrl(hash: string): string | undefined {
-        const cache = this.context.globalState.get<Record<string, { url: string, timestamp: number }>>(UploadCache.CACHE_KEY, {});
-        const entry = cache[hash];
+        const entry = UploadCache.cache[hash];
         return entry?.url;
     }
 
@@ -274,26 +276,23 @@ export class UploadCache {
      * Store a file hash to URL mapping in cache
      */
     async setCachedUrl(hash: string, url: string): Promise<void> {
-        let cache = this.context.globalState.get<Record<string, { url: string, timestamp: number }>>(UploadCache.CACHE_KEY, {});
-        
         // Simple size limit: if cache is too large, clear oldest entries by timestamp
-        if (Object.keys(cache).length >= UploadCache.MAX_CACHE_SIZE) {
-            const entries = Object.entries(cache);
+        if (Object.keys(UploadCache.cache).length >= UploadCache.MAX_CACHE_SIZE) {
+            const entries = Object.entries(UploadCache.cache);
             // Sort by timestamp (oldest first) and remove oldest half
             entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
             const half = Math.floor(entries.length / 2);
-            cache = Object.fromEntries(entries.slice(half));
+            UploadCache.cache = Object.fromEntries(entries.slice(half));
         }
         
-        cache[hash] = { url, timestamp: Date.now() };
-        await this.context.globalState.update(UploadCache.CACHE_KEY, cache);
+        UploadCache.cache[hash] = { url, timestamp: Date.now() };
     }
 
     /**
      * Clear all cached entries
      */
     async clearCache(): Promise<void> {
-        await this.context.globalState.update(UploadCache.CACHE_KEY, {});
+        UploadCache.cache = {};
     }
 }
 

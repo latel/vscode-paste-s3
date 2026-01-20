@@ -12,7 +12,7 @@ import { getLogger } from './logger.mjs';
 export class ResourceFileLoader {
     private readonly options: ResourceFileLoaderOptions;
     constructor(public readonly languageId: string) {
-        const languageOptions = vscode.workspace.getConfiguration('paste-s3', { languageId });
+        const languageOptions = vscode.workspace.getConfiguration('pasteS3', { languageId });
         this.options = {
             enabled: languageOptions.get<boolean>('enabled')!,
             uploadDestination: languageOptions.get<UploadDestination>('uploadDestination')!,
@@ -27,6 +27,8 @@ export class ResourceFileLoader {
             ignoreWorkspaceFiles: languageOptions.get<boolean>('ignoreWorkspaceFiles')!,
             retrieveOriginalImage: languageOptions.get<boolean>('retrieveOriginalImage')!
         };
+        const logger = getLogger();
+        logger.info(`ResourceFileLoader initialized for language ${languageId} with options: ${JSON.stringify(this.options)}`);
     }
 
     public getUploadDestination(): UploadDestination {
@@ -143,7 +145,6 @@ export class ResourceFileLoader {
             return files;
         }
         // Match src="..." in
-        // <img src="https://cdn.duanyll.com/%E4%B8%AD%E6%96%87"/>
         const regex = /src="([^"]+)"/;
         const url = regex.exec(htmlContent!)?.[1];
         if (_.isEmpty(url)) {
@@ -166,7 +167,7 @@ export class ResourceFileLoader {
             return completedFile ? [completedFile] : files;
         } catch (error) {
             logger.warn(`Failed to retrieve original image from URL: ${url}. Animated content may be lost.`, error);
-            vscode.window.showWarningMessage(`Failed to retrieve original image from URL: ${url}. Animated content may be lost.`);
+            vscode.window.showWarningMessage(vscode.l10n.t('Failed to retrieve original image from URL: {0}. Animated content may be lost.', url!));
             return files;
         }
     }

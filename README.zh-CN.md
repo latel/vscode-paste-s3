@@ -1,14 +1,12 @@
 <p align="center">
-  <img src="https://github.com/latel/vscode-paste-s3/blob/master/assets/icon.png?raw=true" />
+  <img src="./assets/icon.png?raw=true" />
 </p>
 
 # 粘贴并上传
 
 [![](https://img.shields.io/badge/Visual_Studio_Marketplace-Download-blue)](https://marketplace.visualstudio.com/items?itemName=duanyll.paste-s3) [![](https://img.shields.io/badge/Open_VSX-Download-blue)](https://open-vsx.org/extension/duanyll/paste-s3) [![](https://img.shields.io/badge/GitHub-Source-blue)](https://github.com/latel/vscode-paste-s3)
 
-这个扩展允许您直接从剪贴板粘贴图片（和其他文件），将它们上传到 S3 存储桶或保存到工作区，然后插入指向图片的链接。它使用 `DocumentPaste` 和 `DocumentDrop` API，可在远程工作区中使用。
-
-**🌏 语言支持**: 本扩展现已支持中文（简体）本地化。如果您的 VS Code 设置为中文语言，界面将自动显示为中文。
+此扩展允许您直接从剪贴板（或通过文件）粘贴图像（及其他文件系统文件），将其上传到 S3（或 S3 兼容端点）存储桶，然后插入指向该图像（文件）的链接。它利用 `DocumentPaste` 和 `DocumentDrop` API，并支持在远程工作区中使用。此扩展还支持 S3 兼容存储的 `forcePathStyle`。
 
 ## 功能特性
 
@@ -93,7 +91,7 @@
 
 ### 0.1.0
 
-Paste and Upload 的初始版本。
+paste-s3 的初始版本。
 
 ### 0.2.0
 

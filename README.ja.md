@@ -4,13 +4,11 @@
   <img src="./assets/icon.png?raw=true" />
 </p>
 
-# VSCode Paste S3
+# paste-s3
 
 [![](https://img.shields.io/badge/Visual_Studio_Marketplace-Download-blue)](https://marketplace.visualstudio.com/items?itemName=duanyll.paste-s3) [![](https://img.shields.io/badge/Open_VSX-Download-blue)](https://open-vsx.org/extension/duanyll/paste-s3) [![](https://img.shields.io/badge/GitHub-Source-blue)](https://github.com/latel/vscode-paste-s3)
 
-[中文文档](README.zh-CN.md) | [日本語ドキュメント](README.ja.md) | [한국어 문서](README.ko.md)
-
-This extension allows you to paste images (and other file system) directly from your clipboard (or from file), upload them to a S3 (or S3 compatible endpoint) bucket, then insert a link pointing to the image(file). It utilizes the `DocumentPaste` and `DocumentDrop` API and works on remote workspaces. This extension also supports `forcePathStyle` for S3-compatible storage.
+この拡張機能を使用すると、クリップボード（またはファイル）から画像（およびその他のファイルシステム）を直接貼り付け、S3（またはS3互換エンドポイント）バケットにアップロードして、その画像（ファイル）へのリンクを挿入できます。`DocumentPaste` および `DocumentDrop` API を使用しており、リモートワークスペースでも動作します。この拡張機能は、S3互換ストレージの `forcePathStyle` もサポートしています。
 
 ## Features
 

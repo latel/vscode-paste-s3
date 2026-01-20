@@ -35,11 +35,41 @@ export class ResourcePasteOrDropProvider implements vscode.DocumentPasteEditProv
     loaders: { [languageId: string]: ResourceFileLoader } = {};
     uploaders: { [key: string]: ResourceUploader } = {};
     undoHistory: [string, () => Thenable<void>][] = [];
-    undoLimit = vscode.workspace.getConfiguration('paste-s3').get<number>('undoLimit') ?? 10;
+    undoLimit = vscode.workspace.getConfiguration('pasteS3').get<number>('undoLimit') ?? 10;
     
     constructor(private context: vscode.ExtensionContext) {
         const logger = getLogger();
-        logger.debug('ResourcePasteOrDropProvider created');
+        logger.info(`ResourcePasteOrDropProvider created`);
+        this.logConfiguration();
+    }
+
+    private logConfiguration() {
+        const logger = getLogger();
+        const config = vscode.workspace.getConfiguration('pasteS3');
+        const s3Config = config.get<any>('s3') || {};
+        
+        const dump = {
+            s3: {
+                ...s3Config,
+                accessKeyId: s3Config.accessKeyId ? '******' : undefined,
+                secretAccessKey: s3Config.secretAccessKey ? '******' : undefined
+            },
+            workspace: config.get('workspace'),
+            uploadDestination: config.get('uploadDestination'),
+            enabled: config.get('enabled'),
+            fileSizeLimit: config.get('fileSizeLimit'),
+            allowMultipleFiles: config.get('allowMultipleFiles'),
+            mimeTypeDetectionMethod: config.get('mimeTypeDetectionMethod'),
+            keepOriginalFilename: config.get('keepOriginalFilename'),
+            fileNamingMethod: config.get('fileNamingMethod'),
+            defaultSnippet: config.get('defaultSnippet'),
+            imageSnippet: config.get('imageSnippet'),
+            undoLimit: config.get('undoLimit'),
+            mimeTypeFilter: config.get('mimeTypeFilter'),
+            ignoreWorkspaceFiles: config.get('ignoreWorkspaceFiles'),
+            retrieveOriginalImage: config.get('retrieveOriginalImage')
+        };
+        logger.info(`Effective Configuration: ${JSON.stringify(dump)}`);
     }
 
     private getLoader(languageId: string): ResourceFileLoader {
@@ -190,10 +220,11 @@ export class ResourcePasteOrDropProvider implements vscode.DocumentPasteEditProv
             }),
             vscode.commands.registerCommand('paste-s3.undoRecentUpload', () => this.showUndoMenu()),
             vscode.workspace.onDidChangeConfiguration(e => {
-                if (e.affectsConfiguration('paste-s3')) {
+                if (e.affectsConfiguration('pasteS3')) {
                     const logger = getLogger();
-                    logger.debug('Configuration changed, reloading loaders and uploaders');
-                    this.undoLimit = vscode.workspace.getConfiguration('paste-s3').get<number>('undoLimit') ?? 10;
+                    this.undoLimit = vscode.workspace.getConfiguration('pasteS3').get<number>('undoLimit') ?? 10;
+                    logger.info(`Configuration changed, reloading loaders and uploaders. New undoLimit=${this.undoLimit}`);
+                    this.logConfiguration();
                     while (this.undoHistory.length > this.undoLimit) {
                         this.undoHistory.shift();
                     }

@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 import _ from 'lodash';
 import { S3Client, DeleteObjectCommand, HeadObjectCommand, S3ServiceException, S3ClientConfig } from '@aws-sdk/client-s3';
 import { Upload } from "@aws-sdk/lib-storage";
@@ -17,7 +18,7 @@ export class S3Uploader implements ResourceUploader {
         const logger = getLogger();
         logger.debug('Initializing S3Uploader...');
         this.cache = new UploadCache(context);
-        const s3Section = vscode.workspace.getConfiguration('paste-s3.s3');
+        const s3Section = vscode.workspace.getConfiguration('pasteS3.s3');
         const region = s3Section.get<string>('region');
         if (_.isEmpty(region)) {
             const error = 'Region is required';
@@ -45,7 +46,11 @@ export class S3Uploader implements ResourceUploader {
             clientOptions: this.parseClientOptions(s3Section.get<string>('clientOptions'))
         };
         this.client = this.createClient();
-        logger.info(`S3Uploader initialized: region=${this.s3Option.region}, bucket=${this.s3Option.bucket}, endpoint=${this.s3Option.endpoint || 'default'}`);
+        // Mask sensitive data
+        const logOptions = _.cloneDeep(this.s3Option);
+        logOptions.accessKeyId = logOptions.accessKeyId ? '******' : undefined;
+        logOptions.secretAccessKey = logOptions.secretAccessKey ? '******' : undefined;
+        logger.info(`S3Uploader initialized with options: ${JSON.stringify(logOptions)}`);
     }
 
     private parseClientOptions(clientOptionsJson?: string): Record<string, any> | undefined {
@@ -189,7 +194,7 @@ export class S3Uploader implements ResourceUploader {
         const logger = getLogger();
         logger.info('Testing S3 connection...');
         const payload = new Uint8Array(100 * 1000);
-        const prefix = vscode.workspace.getConfiguration('paste-s3.s3').get<string>('prefix') ?? '';
+        const prefix = vscode.workspace.getConfiguration('pasteS3.s3').get<string>('prefix') ?? '';
         const key = `${prefix}paste-s3-test.txt`;
         try {
             logger.debug(`Uploading test payload: ${key}`);
@@ -221,8 +226,11 @@ export class S3Uploader implements ResourceUploader {
     }
 
     public generatePublicUrl(name: string, extension: string): string {
-        const publicUrlBase = this.s3Option.publicUrlBase;
+        let publicUrlBase = this.s3Option.publicUrlBase;
         if (publicUrlBase) {
+            if (!publicUrlBase.endsWith('/')) {
+                publicUrlBase += '/';
+            }
             if (this.s3Option.omitExtension || _.isEmpty(extension)) {
                 return `${publicUrlBase}${name}`;
             } else {

@@ -11,12 +11,12 @@ export class WorkspaceUploader implements ResourceUploader {
         const logger = getLogger();
         logger.debug('Initializing WorkspaceUploader...');
         this.cache = new UploadCache(context);
-        const workspaceSection = vscode.workspace.getConfiguration('paste-s3.workspace');
+        const workspaceSection = vscode.workspace.getConfiguration('pasteS3.workspace');
         this.options = {
             path: workspaceSection.get<string>('path') ?? '',
             linkBase: workspaceSection.get<string>('linkBase') ?? '',
         };
-        logger.info(`WorkspaceUploader initialized: path=${this.options.path}, linkBase=${this.options.linkBase}`);
+        logger.info(`WorkspaceUploader initialized with options: ${JSON.stringify(this.options)}`);
     }
 
     async uploadFile(file: ResourceFile, doucumentUri: vscode.Uri, edit: vscode.WorkspaceEdit): Promise<ResourceUploadResult> {
