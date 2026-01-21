@@ -216,8 +216,26 @@ export class S3Uploader implements ResourceUploader {
         vscode.window.showInformationMessage('Your S3 connection is working fine');
     }
 
-    public generateKey(name: string, extension: string): string {
-        const prefix = this.s3Option.prefix ?? '';
+    private replacePathVariables(pathStr: string | undefined, name: string, date: Date = new Date()): string {
+        if (!pathStr) {
+            return '';
+        }
+        const year = date.getFullYear().toString();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        
+        return pathStr
+            .replace(/\$\{year\}/g, year)
+            .replace(/\$\{month\}/g, month)
+            .replace(/\$\{day\}/g, day)
+            .replace(/\$\{basename\}/g, name);
+    }
+
+    public generateKey(name: string, extension: string, date: Date = new Date()): string {
+        let prefix = this.replacePathVariables(this.s3Option.prefix ?? '', name, date);
+        // Remove leading slashes to avoid creating empty "root" folder
+        prefix = prefix.replace(/^\/+/, '');
+        
         if (this.s3Option.omitExtension || _.isEmpty(extension)) {
             return `${prefix}${name}`;
         } else {
@@ -225,20 +243,36 @@ export class S3Uploader implements ResourceUploader {
         }
     }
 
-    public generatePublicUrl(name: string, extension: string): string {
+    public generatePublicUrl(name: string, extension: string, date: Date = new Date()): string {
         let publicUrlBase = this.s3Option.publicUrlBase;
         if (publicUrlBase) {
+            publicUrlBase = this.replacePathVariables(publicUrlBase, name, date);
             if (!publicUrlBase.endsWith('/')) {
                 publicUrlBase += '/';
             }
-            if (this.s3Option.omitExtension || _.isEmpty(extension)) {
-                return `${publicUrlBase}${name}`;
+
+            // Get the prefix that would be used in the key
+            let prefix = this.replacePathVariables(this.s3Option.prefix ?? '', name, date);
+            prefix = prefix.replace(/^\/+/, '');
+            
+            // Check if properties of prefix (like "2024/" or "img-") are already in the base
+            // If the base ends with the prefix, we assume the user manually added it (backward compatibility)
+            // Otherwise, we append the full key (which includes the prefix)
+            const shouldUseKey = !_.isEmpty(prefix) && !publicUrlBase.endsWith(prefix);
+
+            if (shouldUseKey) {
+                const key = this.generateKey(name, extension, date);
+                return `${publicUrlBase}${key}`;
             } else {
-                return `${publicUrlBase}${name}.${extension}`;
+                if (this.s3Option.omitExtension || _.isEmpty(extension)) {
+                    return `${publicUrlBase}${name}`;
+                } else {
+                    return `${publicUrlBase}${name}.${extension}`;
+                }
             }
         } else {
             const endpoint = this.s3Option.endpoint ?? `https://s3.${this.s3Option.region}.amazonaws.com`;
-            return vscode.Uri.joinPath(vscode.Uri.parse(endpoint), this.s3Option.bucket, this.generateKey(name, extension)).toString();
+            return vscode.Uri.joinPath(vscode.Uri.parse(endpoint), this.s3Option.bucket, this.generateKey(name, extension, date)).toString();
         }
     }
 
@@ -259,9 +293,10 @@ export class S3Uploader implements ResourceUploader {
         }
         
         // No cache hit, proceed with upload
-        const key = this.generateKey(file.name, file.extension);
+        const now = new Date();
+        const key = this.generateKey(file.name, file.extension, now);
         await this.uploadBuffer(file.data, key, file.mime);
-        const url = this.generatePublicUrl(file.name, file.extension);
+        const url = this.generatePublicUrl(file.name, file.extension, now);
         
         // Cache the URL for future use
         logger.debug(`Caching URL for file hash ${fileHash}: ${url}`);
