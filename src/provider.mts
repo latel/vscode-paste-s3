@@ -148,7 +148,13 @@ export class ResourcePasteOrDropProvider implements vscode.DocumentPasteEditProv
                 logger.debug(`Uploading file: ${file.name}.${file.extension} (${file.data.length} bytes, ${file.mime})`);
                 const result = await uploader.uploadFile(file, edit.documentUri, workspaceEdit);
                 snippets.push(loader.generateSnippet(file, result.uri));
-                logger.info(`Successfully uploaded: ${file.name}.${file.extension} -> ${result.uri}`);
+                
+                if (result.isCacheHit) {
+                    logger.info(`Resolved from cache: ${file.name}.${file.extension} -> ${result.uri}`);
+                } else {
+                    logger.info(`Successfully uploaded: ${file.name}.${file.extension} -> ${result.uri}`);
+                }
+
                 if (result.undo) {
                     this.undoHistory.push([result.undoTitle ?? file.name, result.undo]);
                     if (this.undoHistory.length > this.undoLimit) {

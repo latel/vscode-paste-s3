@@ -289,6 +289,7 @@ export class S3Uploader implements ResourceUploader {
             // Note: No undo provided for cached results since no upload occurred
             return {
                 uri: cachedUrl,
+                isCacheHit: true
             };
         }
         

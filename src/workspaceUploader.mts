@@ -30,7 +30,8 @@ export class WorkspaceUploader implements ResourceUploader {
             logger.info(`Using cached URL for file hash ${fileHash}: ${cachedUrl}`);
             // Return cached URL without creating file
             return {
-                uri: cachedUrl
+                uri: cachedUrl,
+                isCacheHit: true
             };
         }
         

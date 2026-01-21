@@ -37,6 +37,7 @@ export interface ResourceUploadResult {
     uri: string;
     undoTitle?: string;
     undo?: () => Thenable<void>;
+    isCacheHit?: boolean;
 }
 
 export interface ResourceUploader {
