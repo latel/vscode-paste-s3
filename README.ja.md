@@ -10,53 +10,53 @@
 
 この拡張機能を使用すると、クリップボード（またはファイルシステム）から直接画像（またはファイル）を貼り付け、S3（またはS3互換エンドポイント）バケットにアップロードし、その画像（またはファイル）へのリンクを挿入できます。`DocumentPaste` および `DocumentDrop` API を利用しており、リモートワークスペースでも動作します。また、MinIOのようなS3互換ストレージへのパススタイルアクセスのための `forcePathStyle` もサポートしています。
 
-## Features
+## 特徴
 
-- Fetch images from clipboard with VS Code API, even in remote workspaces. No extra hotkeys required, simply press `Ctrl+V` to paste images!
+- VS Code APIを使用してクリップボードから画像を取得します。リモートワークスペースでも動作します。余分なホットキーは不要で、`Ctrl+V`を押して画像を貼り付けるだけです！
   ![Paste from Snipaste](assets/snipaste.gif)
-- Or drag and drop images from your file explorer or browser
+- または、ファイルエクスプローラーやブラウザから画像をドラッグ＆ドロップします
   ![Drag and Drop from Microsoft Edge](assets/drop.gif)
-- Language overridable snippets for inserting links (Built-in support for Markdown and LaTeX)
-- Upload images to any S3-compatible storage (Not limited to AWS S3, e.g. Aliyun OSS, Cloudflare R2, etc.)
-- Or save images to your workspace (Supports virtual workspaces like [Overleaf Workshop](https://marketplace.visualstudio.com/items?itemName=iamhyc.overleaf-workshop))
+- 言語ごとにオーバーライド可能なリンク挿入用スニペット（MarkdownとLaTeXを標準サポート）
+- 任意のS3互換ストレージに画像をアップロード（AWS S3に限らず、Aliyun OSS、Cloudflare R2などにも対応）
+- または、画像をワークスペースに保存します（[Overleaf Workshop](https://marketplace.visualstudio.com/items?itemName=iamhyc.overleaf-workshop)のような仮想ワークスペースもサポート）
   ![Overleaf Workshop Example](assets/overleaf.gif)
-- Smart caching to avoid re-uploading identical files (based on content hash)
+- スマートキャッシングにより、同一ファイルの再アップロードを回避（コンテンツハッシュに基づく）
 
-## Requirements
+## 要件
 
-Need VS Code 1.97 or later. No external dependencies are required, works across all platforms and remote workspaces.
+VS Code 1.97以降が必要です。外部依存関係は不要で、すべてのプラットフォームとリモートワークスペースで動作します。
 
-## Extension Settings
+## 拡張機能の設定
 
-The S3 settings are required if you want to upload images to S3. You can configure them in your user settings (or workspace settings) like this:
+S3に画像をアップロードする場合、S3の設定が必要です。ユーザー設定（またはワークスペース設定）で次のように設定できます：
 
 ```jsonc
 {
   "paste-s3.s3.region": "oss-cn-hongkong",
-  // If you are not using AWS S3, you need to set the endpoint
+  // AWS S3を使用していない場合は、エンドポイントを設定する必要があります
   "paste-s3.s3.endpoint": "https://oss-cn-hongkong.aliyuncs.com",
   "paste-s3.s3.accessKeyId": "YourAccessKeyId",
   "paste-s3.s3.secretAccessKey": "YourSecretAccessKey",
   "paste-s3.s3.bucket": "your-bucket-name",
-  // Will be prepended to S3 object key (Slashes will be preserved as is)
+  // S3オブジェクトキーの前に付加されます（スラッシュはそのまま保持されます）
   "paste-s3.s3.prefix": "img/",
-  // Will be prepended to inserted link (Slashes will be preserved as is)
+  // 挿入されるリンクの前に付加されます（スラッシュはそのまま保持されます）
   "paste-s3.s3.publicUrlBase": "https://cdn.duanyll.com/img/",
-  // Force path style URLs for S3-compatible storage (e.g., MinIO)
+  // S3互換ストレージ（例：MinIO）のためにパススタイルURLを強制します
   "paste-s3.s3.forcePathStyle": true
 }
 ```
 
-It is recommended to configure S3 credentials in your user settings to avoid leaking them. After configuring S3 related options, you can press `Ctrl+Shift+P` and search for `paste-s3: Test S3 Connection` to verify your settings.
+漏洩を防ぐため、S3の認証情報はユーザー設定で構成することをお勧めします。S3関連のオプションを設定した後、`Ctrl+Shift+P`を押して「paste-s3: Test S3 Connection」を検索し、設定を確認できます。
 
-All settings are overridable by workspace settings. Settings directly belonging to `paste-s3` section can be overriden by language-specific settings. For example, the following configuration will enable paste-s3 for Markdown and LaTeX, and upload images to S3 for Markdown and save images to workspace for LaTeX:
+すべての設定はワークスペース設定で上書き可能です。`paste-s3`セクションに直接属する設定は、言語固有の設定で上書きできます。例えば、次の構成ではMarkdownとLaTeXでpaste-s3を有効にし、Markdownの場合はS3に画像をアップロードし、LaTeXの場合は画像をワークスペースに保存します：
 
 ```jsonc
 {
   "paste-s3.enabled": false,
-  // Save as ${workspaceFolder}/figures/image.png
+  // ${workspaceFolder}/figures/image.png として保存
   "paste-s3.workspace.path": "figures",
-  // Insert \includegraphics{image.png} (If you have \graphicspath{figures})
+  // \includegraphics{image.png} を挿入（\graphicspath{figures}がある場合）
   "paste-s3.workspace.linkBase": "",
   "[markdown]": {
     "paste-s3.enabled": true,
@@ -69,22 +69,22 @@ All settings are overridable by workspace settings. Settings directly belonging 
 }
 ```
 
-A full list of settings can be found in the VS Code settings UI (search for `paste-s3`). Here are some notable settings:
+設定の完全なリストはVS Codeの設定UIで見つけることができます（`paste-s3`を検索）。以下はいくつかの主要な設定です：
 
-| Name                                    | Description                               | Default    | Default for Markdown                |
+| 名前                                    | 説明                                      | デフォルト    | Markdownのデフォルト                |
 | --------------------------------------- | ----------------------------------------- | ---------- | ----------------------------------- |
-| `paste-s3.enabled`              | Enable or disable the extension           | `true`     |                                     |
-| `paste-s3.uploadDestination`    | Where to upload images to                 | `s3`       |                                     |
-| `paste-s3.fileNamingMethod`     | How to name the uploaded files            | `md5short` |                                     |
-| `paste-s3.defaultSnippet`       | The default snippet to insert             | `$url`     | `[${1:$TM_SELECTED_TEXT}](${url})`  |
-| `paste-s3.imageSnippet`         | The snippet for images                    | `$url`     | `![${1:$TM_SELECTED_TEXT}](${url})` |
-| `paste-s3.mimeTypeFilter`       | Regex to filter pasted files by MIME type | `""`       |                                     |
-| `paste-s3.ignoreWorkspaceFiles` | Ignore files already in workspace         | `true`     |                                     |
+| `paste-s3.enabled`              | 拡張機能を有効または無効にする             | `true`     |                                     |
+| `paste-s3.uploadDestination`    | 画像のアップロード先                      | `s3`       |                                     |
+| `paste-s3.fileNamingMethod`     | アップロードファイルの命名方法             | `md5short` |                                     |
+| `paste-s3.defaultSnippet`       | 挿入するデフォルトのスニペット             | `$url`     | `[${1:$TM_SELECTED_TEXT}](${url})`  |
+| `paste-s3.imageSnippet`         | 画像用スニペット                          | `$url`     | `![${1:$TM_SELECTED_TEXT}](${url})` |
+| `paste-s3.mimeTypeFilter`       | 貼り付けられたファイルをMIMEタイプでフィルタリングする正規表現 | `""`       |                                     |
+| `paste-s3.ignoreWorkspaceFiles` | ワークスペース内のファイルを無視          | `true`     |                                     |
 
-This extension utilizes the native VS Code API to paste images, please also refer to the `Paste As` and `Drop` sections in the VS Code settings to control the behavior of pasting and dropping files, and the priority of this extension.
+この拡張機能は画像を貼り付けるためにネイティブのVS Code APIを利用しています。ファイルの貼り付けやドロップの動作、およびこの拡張機能の優先順位を制御するには、VS Code設定の「貼り付け」および「ドロップ」セクションも参照してください。
 
 ## FAQ
 
-Undoing paste operation by pressing `Ctrl+Z` can revert changes in the workspace, but the images are not deleted from S3. This is a limitation of VS Code API. We provide a workaround by adding a `paste-s3: Undo Recent Upload` command, which will show a list of recent uploads and allow you to manually select and delete them.
+`Ctrl+Z`を押して貼り付け操作を取り消すと、ワークスペースの変更は元に戻りますが、画像はS3から削除されません。これはVS Code APIの制限です。回避策として、「paste-s3: Undo Recent Upload」コマンドを提供しており、最近のアップロード一覧を表示して手動で選択して削除できるようにしています。
 
 ![Undo Recent Upload](assets/undo.gif)
