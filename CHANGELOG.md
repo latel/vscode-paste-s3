@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.1.0
+
+### Minor Changes
+
+- 037f425: feat: add prefix variables in S3 filename generation
+
 ## 0.0.3
 
 ### Patch Changes
