@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.1.1
+
+### Patch Changes
+
+- c787d74: fix: 避免解析到浏览器版 XML 解析器
+
 ## 0.1.0
 
 ### Minor Changes
